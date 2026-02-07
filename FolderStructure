@@ -1,0 +1,31 @@
+
+
+restassured-enterprise-framework/
+│
+├── src/
+│   ├── main/java/framework/
+│   │   ├── core/            # RestAssured engine, specs, auth strategy
+│   │   ├── client/          # Service classes (ReqresClient, PetstoreClient…)
+│   │   ├── models/          # Request/Response POJOs
+│   │   ├── data/            # Test data builders & generators
+│   │   ├── utils/           # ConfigReader, Logger, Json utils, Retry
+│   │   └── constants/       # Endpoints, headers, enums
+│   │
+│   ├── test/java/tests/
+│   │   ├── base/            # BaseTest
+│   │   ├── reqres/
+│   │   ├── petstore/
+│   │   └── github/
+│   │
+│   └── test/resources/
+│       ├── config/
+│       │   ├── qa.properties
+│       │   ├── stage.properties
+│       │   └── prod.properties
+│       ├── payloads/
+│       └── schemas/
+│
+├── logs/
+├── reports/
+├── pom.xml
+└── testng.xml

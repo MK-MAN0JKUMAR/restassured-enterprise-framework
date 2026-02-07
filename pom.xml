@@ -1,0 +1,184 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.framework</groupId>
+  <artifactId>restassured-enterprise-framework</artifactId>
+  <version>1.0.0</version>
+  <name>Rest Assured Enterprise Framework</name>
+
+  <!-- ================= JAVA & ENCODING ================= -->
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Runtime defaults -->
+    <env>qa</env>
+    <groups>smoke</groups>
+    <threads>3</threads>
+
+    <!-- Dependency Versions -->
+    <restassured.version>5.4.0</restassured.version>
+    <testng.version>7.12.0</testng.version>
+    <jackson.databind.version>3.0.4</jackson.databind.version>
+    <lombok.version>1.18.42</lombok.version>
+    <log4j.version>2.25.3</log4j.version>
+    <allure.version>2.32.0</allure.version>
+    <jsonschema.version>6.0.0</jsonschema.version>
+  </properties>
+
+  <!-- ================= DEPENDENCIES ================= -->
+  <dependencies>
+
+    <!-- REST ASSURED -->
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <version>${restassured.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- JSON SCHEMA VALIDATION -->
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>json-schema-validator</artifactId>
+      <version>${jsonschema.version}</version>
+    </dependency>
+
+    <!-- TESTNG -->
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${testng.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- JACKSON FOR POJO MAPPING -->
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.databind.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- LOMBOK -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- LOG4J2 -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+
+    <!-- ALLURE TESTNG -->
+    <dependency>
+      <groupId>io.qameta.allure</groupId>
+      <artifactId>allure-testng</artifactId>
+      <version>${allure.version}</version>
+    </dependency>
+
+  </dependencies>
+
+  <!-- ================= BUILD PLUGINS ================= -->
+  <build>
+    <plugins>
+
+      <!-- COMPILER -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+        </configuration>
+      </plugin>
+
+      <!-- SUREFIRE (TEST EXECUTION) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+
+          <!-- Pick groups dynamically from CLI -->
+          <groups>${groups}</groups>
+
+          <!-- Parallel execution -->
+          <parallel>methods</parallel>
+          <threadCount>${threads}</threadCount>
+
+          <!-- Default values if Jenkins doesn't pass -->
+          <systemPropertyVariables>
+            <env>${env}</env>
+          </systemPropertyVariables>
+
+          <!-- Allure listener -->
+          <properties>
+            <property>
+              <name>listener</name>
+              <value>io.qameta.allure.testng.AllureTestNg</value>
+            </property>
+          </properties>
+
+        </configuration>
+      </plugin>
+
+      <!-- ALLURE REPORT GENERATION -->
+      <plugin>
+        <groupId>io.qameta.allure</groupId>
+        <artifactId>allure-maven</artifactId>
+        <version>2.12.0</version>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <!-- ================= MAVEN PROFILES (ENV SWITCH) ================= -->
+  <profiles>
+
+    <profile>
+      <id>qa</id>
+      <properties>
+        <env>qa</env>
+        <threads>5</threads>
+        <groups>smoke</groups>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>stage</id>
+      <properties>
+        <env>stage</env>
+        <threads>5</threads>
+        <groups>smoke</groups>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>prod</id>
+      <properties>
+        <env>prod</env>
+        <threads>3</threads>
+        <groups>smoke</groups>
+      </properties>
+    </profile>
+
+  </profiles>
+
+</project>
