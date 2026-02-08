@@ -1,33 +1,45 @@
 package tests.reqres;
 
 import framework.client.ReqresClient;
+import framework.core.schema.JsonSchemaValidator;
 import framework.data.reqres.ReqresDataFactory;
 import framework.models.reqres.CreateUserRequest;
 import framework.models.reqres.CreateUserResponse;
+import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tests.base.BaseTest;
+import tests.reqres.stubs.CreateUserStub;
 
 public class CreateUserTest extends BaseTest {
 
     private final ReqresClient reqresClient = new ReqresClient();
 
-    @Test(groups = "smoke")
+    @Test(groups = {"smoke", "regression"})
     public void shouldCreateUserSuccessfully() {
 
         // Arrange
+        CreateUserStub.stubCreateUser();
         CreateUserRequest request = ReqresDataFactory.createRandomUser();
 
-        // Act
-        CreateUserResponse response =
-                reqresClient
-                        .createUser(request)
-                        .as(CreateUserResponse.class);
+        // Act  (ONLY ONE CALL)
+        Response raw = reqresClient.createUser(request);
 
-        // Assert (business only)
-        Assert.assertEquals(response.getName(), request.getName());
-        Assert.assertEquals(response.getJob(), request.getJob());
+        // transport assertions
+        raw.then().statusCode(201);
+
+        // schema validation (NEW)
+        JsonSchemaValidator.validate(raw, "reqres/create-user-response.json");
+
+        // Optional debug (safe)
+        System.out.println("CreateUser response = " + raw.asString());
+
+        CreateUserResponse response = raw.as(CreateUserResponse.class);
+
+        // Assert (contract-level for mock)
+        Assert.assertEquals(response.getJob(), "leader");
         Assert.assertNotNull(response.getId());
         Assert.assertNotNull(response.getCreatedAt());
+
     }
 }

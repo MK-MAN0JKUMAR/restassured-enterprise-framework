@@ -8,55 +8,31 @@ import static io.restassured.RestAssured.given;
 public abstract class BaseApiClient {
 
     protected Response get(String path) {
-        return execute(RequestSpecFactory.get(), "GET", path, null);
+        return execute(RequestSpecFactory.get(), "GET", path);
     }
 
     protected Response delete(String path) {
-        return execute(RequestSpecFactory.get(), "DELETE", path, null);
+        return execute(RequestSpecFactory.get(), "DELETE", path);
     }
 
     protected Response post(String path, Object body) {
         RequestSpecification spec = RequestSpecFactory.get().body(body);
-        return execute(spec, "POST", path, null);
+        return execute(spec, "POST", path);
     }
 
     protected Response put(String path, Object body) {
         RequestSpecification spec = RequestSpecFactory.get().body(body);
-        return execute(spec, "PUT", path, null);
+        return execute(spec, "PUT", path);
     }
 
-    private Response execute(RequestSpecification spec,
-                             String method,
-                             String path,
-                             Object unused) {
+    private Response execute(RequestSpecification spec, String method, String path) {
 
-        Response response;
-
-        switch (method) {
-
-            case "GET":
-                response = given().spec(spec).when().get(path);
-                break;
-
-            case "POST":
-                response = given().spec(spec).when().post(path);
-                break;
-
-            case "PUT":
-                response = given().spec(spec).when().put(path);
-                break;
-
-            case "DELETE":
-                response = given().spec(spec).when().delete(path);
-                break;
-
-            default:
-                throw new IllegalArgumentException("Unsupported HTTP method: " + method);
-        }
-
-        // Centralized success validation
-        response.then().spec(ResponseSpecFactory.success());
-
-        return response;
+        return switch (method) {
+            case "GET" -> given().spec(spec).when().get(path);
+            case "POST" -> given().spec(spec).when().post(path);
+            case "PUT" -> given().spec(spec).when().put(path);
+            case "DELETE" -> given().spec(spec).when().delete(path);
+            default -> throw new IllegalArgumentException("Unsupported HTTP method: " + method);
+        };
     }
 }

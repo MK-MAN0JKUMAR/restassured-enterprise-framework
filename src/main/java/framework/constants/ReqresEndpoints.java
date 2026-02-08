@@ -6,4 +6,5 @@ public final class ReqresEndpoints {
 
     public static final String USERS = "/users";
     public static final String SINGLE_USER = "/users/%s";
+    public static final String USERS_PAGE = "/users?page=%s";
 }

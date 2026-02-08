@@ -16,7 +16,7 @@ public final class RequestSpecFactory {
 
     /**
      * Returns a fresh RequestSpecification cloned from base.
-     * Prevents mutation side-effects in parallel execution.
+     * Prevents mutation side effects in parallel execution.
      */
     public static RequestSpecification get() {
         return new RequestSpecBuilder()
@@ -39,6 +39,12 @@ public final class RequestSpecFactory {
                 .setContentType(ContentType.JSON)
                 .setAccept(ContentType.JSON)
                 .setConfig(raConfig)
+
+                .addHeader("User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36")
+                .addHeader("Accept-Language", "en-US,en;q=0.9")
+
+
                 .log(LogDetail.URI)
                 .log(LogDetail.METHOD);
 

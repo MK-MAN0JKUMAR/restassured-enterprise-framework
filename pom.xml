@@ -22,13 +22,14 @@
     <threads>3</threads>
 
     <!-- Dependency Versions -->
-    <restassured.version>5.4.0</restassured.version>
+    <restassured.version>6.0.0</restassured.version>
     <testng.version>7.12.0</testng.version>
     <jackson.databind.version>3.0.4</jackson.databind.version>
     <lombok.version>1.18.42</lombok.version>
     <log4j.version>2.25.3</log4j.version>
     <allure.version>2.32.0</allure.version>
     <jsonschema.version>6.0.0</jsonschema.version>
+    <wiremock.standalone.version>3.6.0</wiremock.standalone.version>
   </properties>
 
   <!-- ================= DEPENDENCIES ================= -->
@@ -98,6 +99,14 @@
       <version>${allure.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>${wiremock.standalone.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+
   </dependencies>
 
   <!-- ================= BUILD PLUGINS ================= -->
@@ -162,7 +171,7 @@
       <id>qa</id>
       <properties>
         <env>qa</env>
-        <threads>5</threads>
+        <threads>1</threads>
         <groups>smoke</groups>
       </properties>
     </profile>
@@ -171,7 +180,7 @@
       <id>stage</id>
       <properties>
         <env>stage</env>
-        <threads>5</threads>
+        <threads>1</threads>
         <groups>smoke</groups>
       </properties>
     </profile>
@@ -180,7 +189,7 @@
       <id>prod</id>
       <properties>
         <env>prod</env>
-        <threads>3</threads>
+        <threads>1</threads>
         <groups>smoke</groups>
       </properties>
     </profile>

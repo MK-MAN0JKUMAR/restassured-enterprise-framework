@@ -27,6 +27,7 @@ public class ReqresClient extends BaseApiClient {
     }
 
     public Response getUsersPage(int userId) {
-        return delete(String.format(ReqresEndpoints.SINGLE_USER, userId));
+        return get(String.format(ReqresEndpoints.USERS_PAGE, userId));
     }
+
 }

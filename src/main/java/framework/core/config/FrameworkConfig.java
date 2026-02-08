@@ -65,7 +65,7 @@ public final class FrameworkConfig {
             throw new ConfigException("Failed to load config file: " + fileName, e);
         }
 
-        String baseUrl = require(props, "base.url");
+        String baseUrl = System.getProperty("base.url", require(props, "base.url"));
         int connectTimeout = Integer.parseInt(require(props, "connect.timeout"));
         int readTimeout = Integer.parseInt(require(props, "read.timeout"));
         String authType = require(props, "auth.type");

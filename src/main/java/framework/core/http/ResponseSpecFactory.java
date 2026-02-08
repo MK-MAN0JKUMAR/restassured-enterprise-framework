@@ -59,4 +59,14 @@ public final class ResponseSpecFactory {
                 )
                 .build();
     }
+
+    public static ResponseSpecification clientError(int statusCode) {
+
+        return new ResponseSpecBuilder()
+                .expectStatusCode(statusCode)
+                .expectContentType(ContentType.JSON)
+                .build();
+    }
+
+
 }
