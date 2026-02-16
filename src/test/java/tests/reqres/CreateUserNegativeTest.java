@@ -2,6 +2,7 @@ package tests.reqres;
 
 import framework.client.ReqresClient;
 import framework.core.http.ResponseSpecFactory;
+import framework.core.validation.ResponseValidator;
 import framework.models.common.ErrorResponse;
 import io.restassured.response.Response;
 import org.testng.Assert;
@@ -21,7 +22,8 @@ public class CreateUserNegativeTest extends BaseTest {
         Response raw = client.createUser(new Object());
 
         // 1️⃣ Transport-level validation
-        raw.then().spec(ResponseSpecFactory.clientError(400));
+        ResponseValidator.clientError(raw, 400);
+
 
         // 2️⃣ Payload-level validation
         ErrorResponse error = raw.as(ErrorResponse.class);
