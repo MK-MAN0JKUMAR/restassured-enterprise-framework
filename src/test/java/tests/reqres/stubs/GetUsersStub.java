@@ -11,7 +11,8 @@ public final class GetUsersStub {
     public static void stubUsersPage2() {
 
         WireMockManager.getServer().stubFor(
-                get(urlEqualTo("/users?page=2"))
+                get(urlPathEqualTo("/users"))
+                        .withQueryParam("page", equalTo("2"))
                         .willReturn(
                                 aResponse()
                                         .withStatus(200)

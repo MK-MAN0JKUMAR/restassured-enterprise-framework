@@ -29,3 +29,18 @@ restassured-enterprise-framework/
 ├── reports/
 ├── pom.xml
 └── testng.xml
+
+
+mvn clean test -Denv=qa -Dmock=true
+
+mvn clean test -Denv=qa -Dgroups=regression
+
+mvn clean test -Denv=qa -Dgroups=regression -DthreadCount=1
+
+
+for allure report
+run
+mvn allure:report
+target/site/allure-maven-plugin/index.html
+
+

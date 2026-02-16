@@ -2,6 +2,7 @@ package tests.reqres;
 
 import framework.client.ReqresClient;
 import framework.core.schema.JsonSchemaValidator;
+import framework.core.validation.ResponseValidator;
 import framework.models.reqres.GetUsersResponse;
 import io.restassured.response.Response;
 import org.testng.Assert;
@@ -19,10 +20,11 @@ public class GetUsersTest extends BaseTest {
         GetUsersStub.stubUsersPage2();
 
         Response raw = client.getUsersPage(2);
-        JsonSchemaValidator.validate(raw, "reqres/get-users-response.json");
 
-        // Optional debug (safe)
-        System.out.println("CreateUser response = " + raw.asString());
+        ResponseValidator.successWithSchema(
+                raw,
+                "reqres/get-users-response.json"
+        );
 
         GetUsersResponse response = raw.as(GetUsersResponse.class);
 

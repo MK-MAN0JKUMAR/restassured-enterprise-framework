@@ -2,6 +2,7 @@ package tests.reqres;
 
 import framework.client.ReqresClient;
 import framework.core.schema.JsonSchemaValidator;
+import framework.core.validation.ResponseValidator;
 import framework.data.reqres.ReqresDataFactory;
 import framework.models.reqres.CreateUserRequest;
 import framework.models.reqres.CreateUserResponse;
@@ -25,14 +26,10 @@ public class CreateUserTest extends BaseTest {
         // Act  (ONLY ONE CALL)
         Response raw = reqresClient.createUser(request);
 
-        // transport assertions
-        raw.then().statusCode(201);
-
-        // schema validation (NEW)
-        JsonSchemaValidator.validate(raw, "reqres/create-user-response.json");
-
-        // Optional debug (safe)
-        System.out.println("CreateUser response = " + raw.asString());
+        ResponseValidator.successWithSchema(
+                raw,
+                "reqres/create-user-response.json"
+        );
 
         CreateUserResponse response = raw.as(CreateUserResponse.class);
 

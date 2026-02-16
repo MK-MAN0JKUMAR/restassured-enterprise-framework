@@ -106,6 +106,13 @@
       <scope>compile</scope>
     </dependency>
 
+    <dependency>
+      <groupId>io.qameta.allure</groupId>
+      <artifactId>allure-rest-assured</artifactId>
+      <version>${allure.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
 
   </dependencies>
 
@@ -141,6 +148,7 @@
           <!-- Default values if Jenkins doesn't pass -->
           <systemPropertyVariables>
             <env>${env}</env>
+            <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
           </systemPropertyVariables>
 
           <!-- Allure listener -->
