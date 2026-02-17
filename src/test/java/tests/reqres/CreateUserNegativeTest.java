@@ -21,11 +21,11 @@ public class CreateUserNegativeTest extends BaseTest {
 
         Response raw = client.createUser(new Object());
 
-        // 1️⃣ Transport-level validation
+        // Transport-level validation
         ResponseValidator.clientError(raw, 400);
 
 
-        // 2️⃣ Payload-level validation
+        // Payload-level validation
         ErrorResponse error = raw.as(ErrorResponse.class);
 
         Assert.assertEquals(error.getError(), "Bad Request");
