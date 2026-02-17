@@ -12,6 +12,9 @@ target/
 *.iws
 *.iml
 *.ipr
+.allure
+.mvn
+
 
 ### Eclipse ###
 .apt_generated
@@ -37,3 +40,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+
+qodana.yaml
+*qodana_code_quality.yml

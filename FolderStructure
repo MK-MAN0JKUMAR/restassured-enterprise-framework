@@ -3,32 +3,79 @@
 restassured-enterprise-framework/
 │
 ├── src/
-│   ├── main/java/framework/
-│   │   ├── core/            # RestAssured engine, specs, auth strategy
-│   │   ├── client/          # Service classes (ReqresClient, PetstoreClient…)
-│   │   ├── models/          # Request/Response POJOs
-│   │   ├── data/            # Test data builders & generators
-│   │   ├── utils/           # ConfigReader, Logger, Json utils, Retry
-│   │   └── constants/       # Endpoints, headers, enums
+│   ├── main/
+│   │   	└── java/
+│   │   			└── framework/
+│   │       				├── client/
+│   │       				│		└── ReqresClient.java
+│   │       				│
+│   │       				├── constants/
+│   │       				│		└── ReqresEndpoints.java
+│   │       				│
+│   │       				├── core/
+│   │       				│		├── config/
+│   │       				│		│		└── FrameworkConfig.java
+│   │       				│		├── exception/
+│   │       				│		│		├── ConfigException.java
+│   │       				│		│		└── FrameworkException.java
+│   │       				│		├── http/
+│   │       				│		│		├── BaseApiClient.java
+│   │       				│		│		├── HttpMethod.java
+│   │       				│		│		├── RequestSpecFactory.java
+│   │       				│		│		└── ResponseSpecFactory.java
+│   │       				│		├── mock/
+│   │       				│		│		└── WireMockManager.java
+│   │       				│		├── reporting/
+│   │       				│		│		└── AllureRestAssuredFilter.java
+│   │       				│		├── retry/
+│   │       				│		│		└── RetryException.java
+│   │       				│		├── schema/
+│   │       				│		│		├── JsonSchemaValidator.java
+│   │       				│		│		└── SchemaLoader.java
+│   │       				│		└── validation/
+│   │       				│				└── ResponseValidator.java
+│   │       				│
+│   │       				├── data.reqres/
+│   │       				│		└── ReqresDataFactory.java
+│   │       				│
+│   │       				└──  modules/
+│   │       						├── common/
+│   │       						│		└── ErrorResponse.java
+│   │       						└── reqres/
+│   │       								├── CreateUserRequest.java
+│   │       								├── CreateUserResponse.java
+│   │       								└── GetUserResponse.java
 │   │
-│   ├── test/java/tests/
-│   │   ├── base/            # BaseTest
-│   │   ├── reqres/
-│   │   ├── petstore/
-│   │   └── github/
-│   │
-│   └── test/resources/
-│       ├── config/
-│       │   ├── qa.properties
-│       │   ├── stage.properties
-│       │   └── prod.properties
-│       ├── payloads/
-│       └── schemas/
+│   └── test/
+│       ├── java/
+│       │		└── tests/
+│       │    			├── base/
+│       │    			│		└── BaseTest.java
+│       │    			│
+│       │    			└── reqres/
+│       │    					├── stubs/
+│       │    					│		├── CreateUserStub.java
+│       │    					│		├── ErrorStubs.java
+│       │    					│		└── GetUserStub.java
+│       │    			 		│
+│    	│						├── CreateUserNegativeTest.java
+│    	│						├── CreateUserTest.java
+│    	│						└── GetUsersTest.java
+│    	│
+│   	└── resources/
+│      			├── config/
+│       		│   	├── qa.properties
+│       		│   	├── stage.properties
+│       		│   	└── prod.properties
+│       		│
+│       		└── schemas.reqres/
+│       	   			├──  create-users-response.json
+│       	   			└── get-users-response.json
 │
-├── logs/
-├── reports/
+├── FolderStructure
 ├── pom.xml
 └── testng.xml
+
 
 
 mvn clean test -Denv=qa -Dmock=true
@@ -42,5 +89,9 @@ for allure report
 run
 mvn allure:report
 target/site/allure-maven-plugin/index.html
+
+
+
+
 
 
