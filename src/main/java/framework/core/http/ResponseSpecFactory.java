@@ -13,59 +13,101 @@ public final class ResponseSpecFactory {
 
     private ResponseSpecFactory() {}
 
-    /**
-     * Standard success validation:
-     * - Status 2xx
-     * - Optional JSON enforcement
-     * - SLA bound (separate from timeout)
-     */
-    public static ResponseSpecification success(boolean enforceJson) {
-
-        FrameworkConfig config = FrameworkConfig.get();
-        long sla = config.getReadTimeout(); // later replace with dedicated SLA config
-
-        ResponseSpecBuilder builder = new ResponseSpecBuilder()
-                .expectStatusCode(org.hamcrest.Matchers.anyOf(
-                        org.hamcrest.Matchers.is(200),
-                        org.hamcrest.Matchers.is(201),
-                        org.hamcrest.Matchers.is(202),
-                        org.hamcrest.Matchers.is(204)
-                ))
-                .expectResponseTime(lessThan(sla), TimeUnit.MILLISECONDS);
-
-        if (enforceJson) {
-            builder.expectContentType(ContentType.JSON);
-        }
-
-        return builder.build();
-    }
+    // ========================= SUCCESS =========================
 
     /**
-     * Custom expected status with optional JSON + SLA.
+     * 200 OK with JSON enforcement
      */
-    public static ResponseSpecification status(int expectedStatus, boolean enforceJson) {
-
-        FrameworkConfig config = FrameworkConfig.get();
-        long sla = config.getReadTimeout();
-
-        ResponseSpecBuilder builder = new ResponseSpecBuilder()
-                .expectStatusCode(expectedStatus)
-                .expectResponseTime(lessThan(sla), TimeUnit.MILLISECONDS);
-
-        if (enforceJson) {
-            builder.expectContentType(ContentType.JSON);
-        }
-
-        return builder.build();
-    }
-
-    /**
-     * Client error validation (4xx)
-     */
-    public static ResponseSpecification clientError(int statusCode) {
-        return new ResponseSpecBuilder()
-                .expectStatusCode(statusCode)
+    public static ResponseSpecification successJson() {
+        return baseSpec()
+                .expectStatusCode(200)
                 .expectContentType(ContentType.JSON)
                 .build();
+    }
+
+    /**
+     * 201 Created with JSON enforcement
+     */
+    public static ResponseSpecification createdJson() {
+        return baseSpec()
+                .expectStatusCode(201)
+                .expectContentType(ContentType.JSON)
+                .build();
+    }
+
+    /**
+     * 204 No Content (no body expected)
+     */
+    public static ResponseSpecification successNoContent() {
+        return baseSpec()
+                .expectStatusCode(204)
+                .build();
+    }
+
+    // ========================= STATUS ONLY =========================
+
+    /**
+     * Custom status with JSON enforcement
+     */
+    public static ResponseSpecification statusWithJson(int expectedStatus) {
+        return baseSpec()
+                .expectStatusCode(expectedStatus)
+                .expectContentType(ContentType.JSON)
+                .build();
+    }
+
+    /**
+     * Custom status without JSON enforcement
+     */
+    public static ResponseSpecification statusWithoutJson(int expectedStatus) {
+        return baseSpec()
+                .expectStatusCode(expectedStatus)
+                .build();
+    }
+
+    // ========================= CLIENT ERROR =========================
+
+    /**
+     * 4xx validation with JSON error body
+     */
+    public static ResponseSpecification clientError(int expectedStatus) {
+        return baseSpec()
+                .expectStatusCode(expectedStatus)
+                .expectContentType(ContentType.JSON)
+                .build();
+    }
+
+    // ========================= BASE SPEC (SLA CONTROL) =========================
+
+    /**
+     * Central SLA enforcement.
+     * IMPORTANT: SLA must NOT reuse read timeout.
+     */
+    private static ResponseSpecBuilder baseSpec() {
+
+        FrameworkConfig config = FrameworkConfig.get();
+
+        long slaMs = resolveSla(config);
+
+        return new ResponseSpecBuilder()
+                .expectResponseTime(lessThan(slaMs), TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Temporary SLA resolution.
+     * TODO: Move to dedicated config property (api.sla.ms).
+     */
+    private static long resolveSla(FrameworkConfig config) {
+
+        // Fallback to readTimeout for now (temporary)
+        long fallback = config.getReadTimeout();
+
+        String slaProp = System.getProperty("api.sla.ms");
+
+        if (slaProp != null) {
+            return Long.parseLong(slaProp);
+        }
+
+        return fallback;
     }
 }
