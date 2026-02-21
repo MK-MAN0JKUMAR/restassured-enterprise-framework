@@ -10,18 +10,10 @@ import io.restassured.specification.RequestSpecification;
 
 public final class RequestSpecFactory {
 
-    private static final RequestSpecification BASE_SPEC = buildBaseSpec();
-
     private RequestSpecFactory() {}
 
-    /**
-     * Returns a fresh RequestSpecification cloned from base.
-     * Prevents mutation side effects in parallel execution.
-     */
     public static RequestSpecification get() {
-        return new RequestSpecBuilder()
-                .addRequestSpecification(BASE_SPEC)
-                .build();
+        return buildBaseSpec();
     }
 
     private static RequestSpecification buildBaseSpec() {
@@ -35,22 +27,28 @@ public final class RequestSpecFactory {
                 );
 
         RequestSpecBuilder builder = new RequestSpecBuilder()
-                .setBaseUri(config.getBaseUrl())
+                .setBaseUri(resolveBaseUrl(config))
                 .setContentType(ContentType.JSON)
                 .setAccept(ContentType.JSON)
                 .setConfig(raConfig)
-
                 .addHeader("User-Agent",
                         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36")
                 .addHeader("Accept-Language", "en-US,en;q=0.9")
-
-
                 .log(LogDetail.URI)
                 .log(LogDetail.METHOD);
 
         applyAuth(builder, config);
 
         return builder.build();
+    }
+
+    private static String resolveBaseUrl(FrameworkConfig config) {
+
+        if (config.isMockMode()) {
+            return framework.core.mock.WireMockManager.baseUrl();
+        }
+
+        return config.getBaseUrl();
     }
 
     private static void applyAuth(RequestSpecBuilder builder, FrameworkConfig config) {
@@ -65,7 +63,7 @@ public final class RequestSpecFactory {
 
             case "none":
             default:
-                // intentionally empty
+                break;
         }
     }
 }

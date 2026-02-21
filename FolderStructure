@@ -1,11 +1,17 @@
 
 
 restassured-enterprise-framework/
-│
+├── .allure
+├── .github
+├── .idea
+├── .mvn
 ├── src/
 │   ├── main/
+│   │		│
 │   │   	└── java/
+│   │       		│
 │   │   			└── framework/
+│   │       				│
 │   │       				├── client/
 │   │       				│		└── ReqresClient.java
 │   │       				│
@@ -28,31 +34,43 @@ restassured-enterprise-framework/
 │   │       				│		├── reporting/
 │   │       				│		│		└── AllureRestAssuredFilter.java
 │   │       				│		├── retry/
-│   │       				│		│		└── RetryException.java
+│   │       				│		│		└── RetryExecutor.java
 │   │       				│		├── schema/
 │   │       				│		│		├── JsonSchemaValidator.java
 │   │       				│		│		└── SchemaLoader.java
 │   │       				│		└── validation/
 │   │       				│				└── ResponseValidator.java
 │   │       				│
-│   │       				├── data.reqres/
-│   │       				│		└── ReqresDataFactory.java
+│   │       				├── data/
+│   │       				│       └──reqres/
+│   │       				│		        └── ReqresDataFactory.java
 │   │       				│
-│   │       				└──  modules/
-│   │       						├── common/
-│   │       						│		└── ErrorResponse.java
-│   │       						└── reqres/
-│   │       								├── CreateUserRequest.java
-│   │       								├── CreateUserResponse.java
-│   │       								└── GetUserResponse.java
+│   │       				├── domain/
+│   │       				│		├── common/
+│   │       				│		│		└── ErrorResponse.java
+│   │       				│		└── reqres/
+│   │       				│				├── CreateUserRequest.java
+│   │       				│				├── CreateUserResponse.java
+│   │       				│				└── GetUserResponse.java
+│   │                       │
+│   │       				└── utils (empty)
+│   │
 │   │
 │   └── test/
+│       │
 │       ├── java/
+│       │		│
 │       │		└── tests/
+│       │    			│
 │       │    			├── base/
 │       │    			│		└── BaseTest.java
 │       │    			│
-│       │    			└── reqres/
+│       │    			├── github (project 3 later)
+│       │    			│
+│       │    			├── petstore (project 2 later)
+│       │    			│
+│       │    			└── reqres/ (project 1 working)
+│       │    					│
 │       │    					├── stubs/
 │       │    					│		├── CreateUserStub.java
 │       │    					│		├── ErrorStubs.java
@@ -63,18 +81,67 @@ restassured-enterprise-framework/
 │    	│						└── GetUsersTest.java
 │    	│
 │   	└── resources/
+│       		│
+│      			├── _files(auto-generated)
+│       		│
 │      			├── config/
 │       		│   	├── qa.properties
 │       		│   	├── stage.properties
 │       		│   	└── prod.properties
 │       		│
-│       		└── schemas.reqres/
-│       	   			├──  create-users-response.json
-│       	   			└── get-users-response.json
+│      			├── payloads(empty)
+│       		│
+│       		└──  schemas/
+│              		        └──reqres/
+│                   	   			├── create-users-response.json
+│       	   		               	└── get-users-response.json
 │
+├── target
+├── .gitignore
+├── restassured-enterprise-framework.iml
 ├── FolderStructure
-├── pom.xml
-└── testng.xml
+├── testng.xml
+└── pom.xml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,9 +1,8 @@
 package tests.reqres;
 
 import framework.client.ReqresClient;
-import framework.core.schema.JsonSchemaValidator;
 import framework.core.validation.ResponseValidator;
-import framework.models.reqres.GetUsersResponse;
+import framework.domain.reqres.GetUsersResponse;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;

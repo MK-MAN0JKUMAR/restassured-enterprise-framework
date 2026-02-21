@@ -1,4 +1,4 @@
-package framework.models.common;
+package framework.domain.common;
 
 import lombok.Getter;
 

@@ -1,9 +1,8 @@
 package tests.reqres;
 
 import framework.client.ReqresClient;
-import framework.core.http.ResponseSpecFactory;
 import framework.core.validation.ResponseValidator;
-import framework.models.common.ErrorResponse;
+import framework.domain.common.ErrorResponse;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
