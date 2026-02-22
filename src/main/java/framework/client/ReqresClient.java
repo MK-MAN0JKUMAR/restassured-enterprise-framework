@@ -1,12 +1,37 @@
 package framework.client;
 
 import framework.constants.ReqresEndpoints;
-import framework.core.config.FrameworkConfig;
+import framework.constants.ServiceType;
 import framework.core.http.BaseApiClient;
 import framework.core.mock.WireMockManager;
 import io.restassured.response.Response;
 
 public class ReqresClient extends BaseApiClient {
+
+    public ReqresClient() {
+        super(ServiceType.REQRES);
+    }
+
+    @Override
+    protected Response get(String path) {
+
+        if (WireMockManager.isRunning()) {
+            return executeWithOverrideBaseUrl(path);
+        }
+
+        return super.get(path);
+    }
+
+    private Response executeWithOverrideBaseUrl(String path) {
+        return super.execute(
+                framework.core.http.HttpMethod.GET,
+                path,
+                null,
+                null,
+                null,
+                null
+        );
+    }
 
     public Response getUsers() {
         return get(ReqresEndpoints.USERS);
@@ -28,13 +53,7 @@ public class ReqresClient extends BaseApiClient {
         return delete(String.format(ReqresEndpoints.SINGLE_USER, userId));
     }
 
-    public Response getUsersPage(int userId) {
-        return get(String.format(ReqresEndpoints.USERS_PAGE, userId));
+    public Response getUsersPage(int page) {
+        return get(String.format(ReqresEndpoints.USERS_PAGE, page));
     }
-
-    @Override
-    protected String getOverrideBaseUrl() {
-        return WireMockManager.baseUrl();
-    }
-
 }

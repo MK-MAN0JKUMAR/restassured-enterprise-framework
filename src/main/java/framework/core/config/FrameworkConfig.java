@@ -19,32 +19,11 @@ public final class FrameworkConfig {
     private static final FrameworkConfig INSTANCE = load();
 
     private final String env;
-    private final String reqresBaseUrl;
-    private final String petstoreBaseUrl;
-    private final String githubBaseUrl;
-    private final int connectTimeout;
-    private final int readTimeout;
-    private final String authType;
-    private final String token;
+    private final Properties properties;
 
-    private FrameworkConfig(
-            String env,
-            String reqresBaseUrl,
-            String petstoreBaseUrl,
-            String githubBaseUrl,
-            int connectTimeout,
-            int readTimeout,
-            String authType,
-            String token
-    ) {
+    private FrameworkConfig(String env, Properties properties) {
         this.env = env;
-        this.reqresBaseUrl = reqresBaseUrl;
-        this.petstoreBaseUrl = petstoreBaseUrl;
-        this.githubBaseUrl = githubBaseUrl;
-        this.connectTimeout = connectTimeout;
-        this.readTimeout = readTimeout;
-        this.authType = authType;
-        this.token = token;
+        this.properties = properties;
     }
 
     private static FrameworkConfig load() {
@@ -71,38 +50,13 @@ public final class FrameworkConfig {
             throw new ConfigException("Failed to load config file: " + fileName, e);
         }
 
-        String reqresBaseUrl = require(props, "reqres.base.url");
-        String petstoreBaseUrl = require(props, "petstore.base.url");
-        String githubBaseUrl = require(props, "github.base.url");
-
-        int connectTimeout = Integer.parseInt(require(props, "connect.timeout"));
-        int readTimeout = Integer.parseInt(require(props, "read.timeout"));
-        String authType = require(props, "auth.type");
-        String token = System.getProperty("token", props.getProperty("token", ""));
-
-        FrameworkConfig config = new FrameworkConfig(
-                env,
-                reqresBaseUrl,
-                petstoreBaseUrl,
-                githubBaseUrl,
-                connectTimeout,
-                readTimeout,
-                authType,
-                token
-        );
-
         log.info("========== Framework Configuration ==========");
-        log.info("Environment      : {}", config.env);
-        log.info("Reqres URL       : {}", config.reqresBaseUrl);
-        log.info("Petstore URL     : {}", config.petstoreBaseUrl);
-        log.info("GitHub URL       : {}", config.githubBaseUrl);
-        log.info("Connect Timeout  : {} ms", config.connectTimeout);
-        log.info("Read Timeout     : {} ms", config.readTimeout);
-        log.info("Auth Type        : {}", config.authType);
-        log.info("Token Provided   : {}", !config.token.isBlank());
+        log.info("Environment      : {}", env);
+        log.info("Connect Timeout  : {} ms", require(props, "connect.timeout"));
+        log.info("Read Timeout     : {} ms", require(props, "read.timeout"));
         log.info("=============================================");
 
-        return config;
+        return new FrameworkConfig(env, props);
     }
 
     private static String require(Properties props, String key) {
@@ -113,19 +67,27 @@ public final class FrameworkConfig {
         return value.trim();
     }
 
-    public static FrameworkConfig get() { return INSTANCE; }
+    public static FrameworkConfig get() {
+        return INSTANCE;
+    }
 
-    public String getReqresBaseUrl() { return reqresBaseUrl; }
+    public String getEnv() {
+        return env;
+    }
 
-    public String getPetstoreBaseUrl() { return petstoreBaseUrl; }
+    public String getRequired(String key) {
+        return require(properties, key);
+    }
 
-    public String getGithubBaseUrl() { return githubBaseUrl; }
+    public String getOptional(String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue);
+    }
 
-    public int getConnectTimeout() { return connectTimeout; }
+    public int getInt(String key) {
+        return Integer.parseInt(getRequired(key));
+    }
 
-    public int getReadTimeout() { return readTimeout; }
-
-    public String getAuthType() { return authType; }
-
-    public String getToken() { return token; }
+    public String getTokenOverride(String key) {
+        return System.getProperty(key, properties.getProperty(key, ""));
+    }
 }

@@ -1,5 +1,3 @@
-
-
 restassured-enterprise-framework/
 ├── .allure
 ├── .github
@@ -95,9 +93,15 @@ restassured-enterprise-framework/
 │       │    			├── base/
 │       │    			│		└── BaseTest.java
 │       │    			│
-│       │    			├── github (project 3 later)
+│       │    			├── github/ (project 3 start now)- now start working on this
 │       │    			│
-│       │    			├── petstore (project 2 starting)- now start working on this
+│       │    			├── petstore/ (project 2 done/completed)
+│       │    			│		│
+│       │    			│		├── CreateGetDeletePetFlowTest.java
+│    	│				│		├── CreatePetNegativeTest.java
+│    	│				│		├── CreatePetTest.java
+│    	│				│		├── FindPetByStatusTest.java
+│    	│				│		└── UploadPetImageTest.java
 │       │    			│
 │       │    			└── reqres/ (project 1 done/completed)
 │       │    					│
@@ -122,10 +126,19 @@ restassured-enterprise-framework/
 │       		│
 │      			├── payloads(empty)
 │       		│
-│       		└──  schemas/
-│              		        └──reqres/
-│                   	   			├── create-users-response.json
-│       	   		               	└── get-users-response.json
+│       		└── schemas/
+│                       │
+│           			├── petstore/
+│           			│		├── create-pet-response.json
+│    					│		├── error-response.json
+│    					│		├── find-by-status-response.json
+│    					│		└── get-pet-response.json
+│    					│
+│              		    ├── reqres/
+│                   	│   	├── create-users-response.json
+│       	   		    │       └── get-users-response.json
+│                       │
+│              		    └── sample-image.jpg
 │
 ├── target
 ├── .gitignore

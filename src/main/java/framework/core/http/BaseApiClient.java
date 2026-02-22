@@ -1,5 +1,6 @@
 package framework.core.http;
 
+import framework.constants.ServiceType;
 import framework.core.reporting.AllureRestAssuredFilter;
 import framework.core.retry.RetryExecutor;
 import io.restassured.response.Response;
@@ -14,11 +15,14 @@ import static io.restassured.RestAssured.given;
 
 public abstract class BaseApiClient {
 
-    private static final Logger log = LogManager.getLogger(BaseApiClient.class);
+    private static final Logger log =
+            LogManager.getLogger(BaseApiClient.class);
 
-    // =========================
-    // Basic Methods
-    // =========================
+    private final ServiceType serviceType;
+
+    protected BaseApiClient(ServiceType serviceType) {
+        this.serviceType = serviceType;
+    }
 
     protected Response get(String path) {
         return execute(HttpMethod.GET, path, null, null, null, null);
@@ -40,17 +44,6 @@ public abstract class BaseApiClient {
         return execute(HttpMethod.PATCH, path, body, null, null, null);
     }
 
-    /**
-     * Each client MUST override this.
-     */
-    protected String getOverrideBaseUrl() {
-        return null;
-    }
-
-    // =========================
-    // Enterprise Execution
-    // =========================
-
     protected Response execute(HttpMethod method,
                                String path,
                                Object body,
@@ -58,17 +51,8 @@ public abstract class BaseApiClient {
                                Map<String, ?> queryParams,
                                File multipartFile) {
 
-        RequestSpecification spec = RequestSpecFactory.get();
-
-        String baseUrl = getOverrideBaseUrl();
-
-        if (baseUrl == null || baseUrl.isBlank()) {
-            throw new IllegalStateException(
-                    "Base URL not defined in client: " + this.getClass().getSimpleName()
-            );
-        }
-
-        spec.baseUri(baseUrl);
+        RequestSpecification spec =
+                RequestSpecFactory.get(serviceType);
 
         if (pathParams != null && !pathParams.isEmpty()) {
             spec.pathParams(pathParams);
@@ -78,17 +62,6 @@ public abstract class BaseApiClient {
             spec.queryParams(queryParams);
         }
 
-//
-//        if (body != null) {
-//            spec.body(body);
-//        }
-//
-//        if (multipartFile != null) {
-//            spec.multiPart(multipartFile);
-//        }
-
-
-
         if (multipartFile != null) {
             spec.multiPart(multipartFile);
         } else if (body != null) {
@@ -96,12 +69,11 @@ public abstract class BaseApiClient {
             spec.body(body);
         }
 
-
         long start = System.currentTimeMillis();
 
-        Response response = RetryExecutor.executeWithRetry(() ->
-                sendRequest(spec, method, path)
-        );
+        Response response =
+                RetryExecutor.executeWithRetry(method,
+                        () -> sendRequest(spec, method, path));
 
         long duration = System.currentTimeMillis() - start;
 
@@ -116,36 +88,35 @@ public abstract class BaseApiClient {
                                  String path) {
 
         return switch (method) {
-
             case GET -> given()
+                    .filter(new SensitiveHeaderFilter())
                     .filter(AllureRestAssuredFilter.get())
                     .spec(spec)
-                    .when()
-                    .get(path);
+                    .when().get(path);
 
             case POST -> given()
+                    .filter(new SensitiveHeaderFilter())
                     .filter(AllureRestAssuredFilter.get())
                     .spec(spec)
-                    .when()
-                    .post(path);
+                    .when().post(path);
 
             case PUT -> given()
+                    .filter(new SensitiveHeaderFilter())
                     .filter(AllureRestAssuredFilter.get())
                     .spec(spec)
-                    .when()
-                    .put(path);
+                    .when().put(path);
 
             case DELETE -> given()
+                    .filter(new SensitiveHeaderFilter())
                     .filter(AllureRestAssuredFilter.get())
                     .spec(spec)
-                    .when()
-                    .delete(path);
+                    .when().delete(path);
 
             case PATCH -> given()
+                    .filter(new SensitiveHeaderFilter())
                     .filter(AllureRestAssuredFilter.get())
                     .spec(spec)
-                    .when()
-                    .patch(path);
+                    .when().patch(path);
         };
     }
 }

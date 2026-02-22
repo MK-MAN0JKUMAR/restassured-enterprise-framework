@@ -36,7 +36,7 @@ public final class ResponseSpecFactory {
     }
 
     /**
-     * 204 No Content (no body expected)
+     * 204 No Content (nobody expected)
      */
     public static ResponseSpecification successNoContent() {
         return baseSpec()
@@ -99,15 +99,11 @@ public final class ResponseSpecFactory {
      */
     private static long resolveSla(FrameworkConfig config) {
 
-        // Fallback to readTimeout for now (temporary)
-        long fallback = config.getReadTimeout();
+        String cliSla = System.getProperty("api.sla.ms");
 
-        String slaProp = System.getProperty("api.sla.ms");
-
-        if (slaProp != null) {
-            return Long.parseLong(slaProp);
+        if (cliSla != null) {
+            return Long.parseLong(cliSla);
         }
-
-        return fallback;
+        return Long.parseLong(config.getOptional("api.sla.ms", "5000"));
     }
 }

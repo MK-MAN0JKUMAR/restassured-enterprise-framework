@@ -1,5 +1,6 @@
 package framework.core.retry;
 
+import framework.core.http.HttpMethod;
 import io.restassured.response.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,12 +12,13 @@ public final class RetryExecutor {
     private static final Logger log =
             LogManager.getLogger(RetryExecutor.class);
 
-    private static final int MAX_RETRIES = 3;        // retries AFTER first attempt
-    private static final long BASE_DELAY_MS = 300;   // exponential backoff base
+    private static final int MAX_RETRIES = 3;
+    private static final long BASE_DELAY_MS = 300;
 
     private RetryExecutor() {}
 
-    public static Response executeWithRetry(Supplier<Response> requestCall) {
+    public static Response executeWithRetry(HttpMethod method,
+                                            Supplier<Response> requestCall) {
 
         int attempt = 0;
 
@@ -26,13 +28,13 @@ public final class RetryExecutor {
                 Response response = requestCall.get();
                 int status = response.statusCode();
 
-                if (!shouldRetry(status) || attempt >= MAX_RETRIES) {
+                if (!shouldRetry(method, status) || attempt >= MAX_RETRIES) {
                     return response;
                 }
 
                 long delay = calculateDelay(attempt);
-                log.warn("Retry attempt {} for status {}. Waiting {} ms",
-                        attempt + 1, status, delay);
+                log.warn("Retry attempt {} for {} due to status {}. Waiting {} ms",
+                        attempt + 1, method, status, delay);
 
                 sleep(delay);
                 attempt++;
@@ -44,8 +46,8 @@ public final class RetryExecutor {
                 }
 
                 long delay = calculateDelay(attempt);
-                log.warn("Retry attempt {} due to exception: {}. Waiting {} ms",
-                        attempt + 1, ex.getMessage(), delay);
+                log.warn("Retry attempt {} for {} due to exception {}. Waiting {} ms",
+                        attempt + 1, method, ex.getMessage(), delay);
 
                 sleep(delay);
                 attempt++;
@@ -53,8 +55,14 @@ public final class RetryExecutor {
         }
     }
 
-    private static boolean shouldRetry(int status) {
-        return status >= 500 || status == 429 || status == 408;
+    private static boolean shouldRetry(HttpMethod method, int status) {
+
+        boolean idempotent = method == HttpMethod.GET;
+
+        if (!idempotent) return false;
+
+        return status >= 500 || status == 408;
+        // 429 removed intentionally (GitHub rate limit should NOT auto-retry)
     }
 
     private static long calculateDelay(int attempt) {

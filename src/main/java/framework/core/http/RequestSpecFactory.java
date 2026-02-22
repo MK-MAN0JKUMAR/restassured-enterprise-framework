@@ -1,6 +1,9 @@
 package framework.core.http;
 
+import framework.constants.ServiceType;
 import framework.core.config.FrameworkConfig;
+import framework.core.config.ServiceConfig;
+import framework.core.config.ServiceConfigResolver;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
@@ -10,57 +13,52 @@ import io.restassured.specification.RequestSpecification;
 
 public final class RequestSpecFactory {
 
-    private static final RequestSpecification BASE_SPEC = buildBaseSpec();
-
     private RequestSpecFactory() {}
 
     /**
-     * Returns a fresh cloned RequestSpecification
-     * to prevent mutation side effects in parallel execution.
+     * Backward compatibility.
      */
     public static RequestSpecification get() {
-        return new RequestSpecBuilder()
-                .addRequestSpecification(BASE_SPEC)
-                .build();
+        return get(ServiceType.REQRES);
     }
 
-    private static RequestSpecification buildBaseSpec() {
+    public static RequestSpecification get(ServiceType serviceType) {
 
-        FrameworkConfig config = FrameworkConfig.get();
+        ServiceConfig serviceConfig =
+                ServiceConfigResolver.resolve(serviceType);
+
+        FrameworkConfig globalConfig =
+                FrameworkConfig.get();
 
         RestAssuredConfig raConfig = RestAssuredConfig.config()
                 .httpClient(HttpClientConfig.httpClientConfig()
-                        .setParam("http.connection.timeout", config.getConnectTimeout())
-                        .setParam("http.socket.timeout", config.getReadTimeout())
+                        .setParam("http.connection.timeout",
+                                globalConfig.getInt("connect.timeout"))
+                        .setParam("http.socket.timeout",
+                                globalConfig.getInt("read.timeout"))
                 );
 
         RequestSpecBuilder builder = new RequestSpecBuilder()
-//                .setContentType(ContentType.JSON)
+                .setBaseUri(serviceConfig.getBaseUrl())
                 .setAccept(ContentType.JSON)
                 .setConfig(raConfig)
                 .addHeader("User-Agent", "RestAssured-Enterprise-Framework")
-                .addHeader("Accept-Language", "en-US,en;q=0.9")
                 .log(LogDetail.URI)
                 .log(LogDetail.METHOD);
 
-        applyAuth(builder, config);
+        applyAuth(builder, serviceConfig);
 
         return builder.build();
     }
 
-    private static void applyAuth(RequestSpecBuilder builder, FrameworkConfig config) {
+    private static void applyAuth(RequestSpecBuilder builder,
+                                  ServiceConfig serviceConfig) {
 
-        switch (config.getAuthType().toLowerCase()) {
+        if ("bearer".equalsIgnoreCase(serviceConfig.getAuthType())
+                && !serviceConfig.getToken().isBlank()) {
 
-            case "bearer":
-                if (!config.getToken().isBlank()) {
-                    builder.addHeader("Authorization", "Bearer " + config.getToken());
-                }
-                break;
-
-            case "none":
-            default:
-                break;
+            builder.addHeader("Authorization",
+                    "Bearer " + serviceConfig.getToken());
         }
     }
 }

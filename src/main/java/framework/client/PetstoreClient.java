@@ -1,7 +1,7 @@
 package framework.client;
 
 import framework.constants.PetstoreEndpoints;
-import framework.core.config.FrameworkConfig;
+import framework.constants.ServiceType;
 import framework.core.http.BaseApiClient;
 import framework.core.http.HttpMethod;
 import framework.domain.petstore.PetRequest;
@@ -12,9 +12,8 @@ import java.util.Map;
 
 public class PetstoreClient extends BaseApiClient {
 
-    @Override
-    protected String getOverrideBaseUrl() {
-        return FrameworkConfig.get().getPetstoreBaseUrl();
+    public PetstoreClient() {
+        super(ServiceType.PETSTORE);
     }
 
     public Response createPet(PetRequest request) {
@@ -64,6 +63,4 @@ public class PetstoreClient extends BaseApiClient {
                 file
         );
     }
-
-
 }

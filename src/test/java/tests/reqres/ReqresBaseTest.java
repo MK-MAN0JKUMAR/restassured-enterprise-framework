@@ -1,18 +1,18 @@
 package tests.reqres;
 
 import framework.core.mock.WireMockManager;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import tests.base.BaseTest;
 
 public abstract class ReqresBaseTest extends BaseTest {
 
-    @BeforeMethod(alwaysRun = true)
+    @BeforeClass(alwaysRun = true)
     public void startMock() {
         WireMockManager.start();
     }
 
-    @AfterMethod(alwaysRun = true)
+    @AfterClass(alwaysRun = true)
     public void stopMock() {
         WireMockManager.stop();
     }
