@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import tests.base.BaseTest;
 import tests.reqres.stubs.CreateUserStub;
 
-public class CreateUserTest extends BaseTest {
+public class CreateUserTest extends ReqresBaseTest {
 
     private final ReqresClient reqresClient = new ReqresClient();
 

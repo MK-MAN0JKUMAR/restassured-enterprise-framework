@@ -23,4 +23,10 @@ public final class DataSeedManager {
     public static long getSeed() {
         return GLOBAL_SEED;
     }
+
+    public static long nextId() {
+        long value = Math.abs(random().nextLong());
+        return value == 0 ? 1 : value;
+    }
+
 }

@@ -101,4 +101,17 @@ public final class ResponseValidator {
         clientError(response, expectedStatus);
         schema(response, schemaPath);
     }
+
+    public static void assertResponseTime(Response response, long maxMillis) {
+
+        long actual = response.getTime();
+
+        if (actual > maxMillis) {
+            throw new AssertionError(
+                    "Response time exceeded. Expected <= "
+                            + maxMillis + " ms but was "
+                            + actual + " ms"
+            );
+        }
+    }
 }

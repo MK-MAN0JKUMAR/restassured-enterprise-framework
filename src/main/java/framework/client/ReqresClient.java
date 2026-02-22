@@ -1,7 +1,9 @@
 package framework.client;
 
 import framework.constants.ReqresEndpoints;
+import framework.core.config.FrameworkConfig;
 import framework.core.http.BaseApiClient;
+import framework.core.mock.WireMockManager;
 import io.restassured.response.Response;
 
 public class ReqresClient extends BaseApiClient {
@@ -28,6 +30,11 @@ public class ReqresClient extends BaseApiClient {
 
     public Response getUsersPage(int userId) {
         return get(String.format(ReqresEndpoints.USERS_PAGE, userId));
+    }
+
+    @Override
+    protected String getOverrideBaseUrl() {
+        return WireMockManager.baseUrl();
     }
 
 }

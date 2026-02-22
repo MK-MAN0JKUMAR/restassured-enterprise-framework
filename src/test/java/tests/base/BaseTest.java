@@ -1,11 +1,11 @@
 package tests.base;
 
-import framework.core.mock.WireMockManager;
 import framework.data.DataSeedManager;
 import io.qameta.allure.testng.AllureTestNg;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.testng.annotations.*;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Listeners;
 
 @Listeners({AllureTestNg.class})
 public abstract class BaseTest {
@@ -15,15 +15,5 @@ public abstract class BaseTest {
     @BeforeSuite(alwaysRun = true)
     public void logSeed() {
         log.info("Data Seed: {}", DataSeedManager.getSeed());
-    }
-
-    @BeforeMethod(alwaysRun = true)
-    public void startMockServer() {
-        WireMockManager.start();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void stopMockServer() {
-        WireMockManager.stop();
     }
 }

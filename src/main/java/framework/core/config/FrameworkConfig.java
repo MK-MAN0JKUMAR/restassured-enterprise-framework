@@ -1,7 +1,6 @@
 package framework.core.config;
 
 import framework.core.exception.ConfigException;
-import framework.core.mock.WireMockManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,14 +16,12 @@ public final class FrameworkConfig {
     private static final String DEFAULT_ENV = "qa";
     private static final String CONFIG_PATH = "config/";
 
-    /**
-     * Eager immutable load → enterprise-safe for parallel execution.
-     */
     private static final FrameworkConfig INSTANCE = load();
 
     private final String env;
-    private final boolean mockMode;
-    private final String baseUrl;
+    private final String reqresBaseUrl;
+    private final String petstoreBaseUrl;
+    private final String githubBaseUrl;
     private final int connectTimeout;
     private final int readTimeout;
     private final String authType;
@@ -32,16 +29,18 @@ public final class FrameworkConfig {
 
     private FrameworkConfig(
             String env,
-            boolean mockMode,
-            String baseUrl,
+            String reqresBaseUrl,
+            String petstoreBaseUrl,
+            String githubBaseUrl,
             int connectTimeout,
             int readTimeout,
             String authType,
             String token
     ) {
         this.env = env;
-        this.mockMode = mockMode;
-        this.baseUrl = baseUrl;
+        this.reqresBaseUrl = reqresBaseUrl;
+        this.petstoreBaseUrl = petstoreBaseUrl;
+        this.githubBaseUrl = githubBaseUrl;
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
         this.authType = authType;
@@ -50,14 +49,12 @@ public final class FrameworkConfig {
 
     private static FrameworkConfig load() {
 
-        // -------- ENV RESOLUTION --------
         String env = System.getProperty("env", DEFAULT_ENV).toLowerCase();
 
         if (!ALLOWED_ENVS.contains(env)) {
             throw new ConfigException("Invalid environment: " + env + ". Allowed: " + ALLOWED_ENVS);
         }
 
-        // -------- LOAD PROPERTY FILE --------
         String fileName = CONFIG_PATH + env + ".properties";
         Properties props = new Properties();
 
@@ -74,35 +71,31 @@ public final class FrameworkConfig {
             throw new ConfigException("Failed to load config file: " + fileName, e);
         }
 
-        // -------- MOCK MODE --------
-        boolean mockMode = Boolean.parseBoolean(System.getProperty("mock", "false"));
+        String reqresBaseUrl = require(props, "reqres.base.url");
+        String petstoreBaseUrl = require(props, "petstore.base.url");
+        String githubBaseUrl = require(props, "github.base.url");
 
-        // -------- BASE URL RESOLUTION --------
-        String baseUrl;
-
-        if (mockMode) {
-            baseUrl = null; // will be resolved per thread dynamically
-        } else {
-            baseUrl = System.getProperty("base.url", require(props, "base.url"));
-        }
-
-        // -------- OTHER CONFIG --------
         int connectTimeout = Integer.parseInt(require(props, "connect.timeout"));
         int readTimeout = Integer.parseInt(require(props, "read.timeout"));
         String authType = require(props, "auth.type");
-
-        // CLI override for secrets (CI-safe)
         String token = System.getProperty("token", props.getProperty("token", ""));
 
         FrameworkConfig config = new FrameworkConfig(
-                env, mockMode, baseUrl, connectTimeout, readTimeout, authType, token
+                env,
+                reqresBaseUrl,
+                petstoreBaseUrl,
+                githubBaseUrl,
+                connectTimeout,
+                readTimeout,
+                authType,
+                token
         );
 
-        // -------- STARTUP LOGGING --------
         log.info("========== Framework Configuration ==========");
         log.info("Environment      : {}", config.env);
-        log.info("Mock Mode        : {}", config.mockMode);
-        log.info("Base URL         : {}", config.baseUrl);
+        log.info("Reqres URL       : {}", config.reqresBaseUrl);
+        log.info("Petstore URL     : {}", config.petstoreBaseUrl);
+        log.info("GitHub URL       : {}", config.githubBaseUrl);
         log.info("Connect Timeout  : {} ms", config.connectTimeout);
         log.info("Read Timeout     : {} ms", config.readTimeout);
         log.info("Auth Type        : {}", config.authType);
@@ -120,17 +113,13 @@ public final class FrameworkConfig {
         return value.trim();
     }
 
-    public static FrameworkConfig get() {
-        return INSTANCE;
-    }
+    public static FrameworkConfig get() { return INSTANCE; }
 
-    // -------- GETTERS --------
+    public String getReqresBaseUrl() { return reqresBaseUrl; }
 
-    public String getEnv() { return env; }
+    public String getPetstoreBaseUrl() { return petstoreBaseUrl; }
 
-    public boolean isMockMode() { return mockMode; }
-
-    public String getBaseUrl() { return baseUrl; }
+    public String getGithubBaseUrl() { return githubBaseUrl; }
 
     public int getConnectTimeout() { return connectTimeout; }
 

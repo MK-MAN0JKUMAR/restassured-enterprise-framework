@@ -7,47 +7,89 @@ import io.restassured.specification.RequestSpecification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.util.Map;
+
 import static io.restassured.RestAssured.given;
 
 public abstract class BaseApiClient {
 
     private static final Logger log = LogManager.getLogger(BaseApiClient.class);
 
+    // =========================
+    // Basic Methods
+    // =========================
+
     protected Response get(String path) {
-        return execute(HttpMethod.GET, path, null);
+        return execute(HttpMethod.GET, path, null, null, null, null);
     }
 
     protected Response delete(String path) {
-        return execute(HttpMethod.DELETE, path, null);
+        return execute(HttpMethod.DELETE, path, null, null, null, null);
     }
 
     protected Response post(String path, Object body) {
-        return execute(HttpMethod.POST, path, body);
+        return execute(HttpMethod.POST, path, body, null, null, null);
     }
 
     protected Response put(String path, Object body) {
-        return execute(HttpMethod.PUT, path, body);
+        return execute(HttpMethod.PUT, path, body, null, null, null);
     }
 
     protected Response patch(String path, Object body) {
-        return execute(HttpMethod.PATCH, path, body);
+        return execute(HttpMethod.PATCH, path, body, null, null, null);
     }
 
     /**
-     * Single enterprise execution pipeline.
+     * Each client MUST override this.
      */
-    private Response execute(HttpMethod method, String path, Object body) {
+    protected String getOverrideBaseUrl() {
+        return null;
+    }
+
+    // =========================
+    // Enterprise Execution
+    // =========================
+
+    protected Response execute(HttpMethod method,
+                               String path,
+                               Object body,
+                               Map<String, ?> pathParams,
+                               Map<String, ?> queryParams,
+                               File multipartFile) {
 
         RequestSpecification spec = RequestSpecFactory.get();
+
+        String baseUrl = getOverrideBaseUrl();
+
+        if (baseUrl == null || baseUrl.isBlank()) {
+            throw new IllegalStateException(
+                    "Base URL not defined in client: " + this.getClass().getSimpleName()
+            );
+        }
+
+        spec.baseUri(baseUrl);
+
+        if (pathParams != null && !pathParams.isEmpty()) {
+            spec.pathParams(pathParams);
+        }
+
+        if (queryParams != null && !queryParams.isEmpty()) {
+            spec.queryParams(queryParams);
+        }
 
         if (body != null) {
             spec.body(body);
         }
 
+        if (multipartFile != null) {
+            spec.multiPart(multipartFile);
+        }
+
         long start = System.currentTimeMillis();
 
         Response response = RetryExecutor.executeWithRetry(() ->
-                sendRequestWithAllure(spec, method, path)
+                sendRequest(spec, method, path)
         );
 
         long duration = System.currentTimeMillis() - start;
@@ -58,15 +100,12 @@ public abstract class BaseApiClient {
         return response;
     }
 
-    /**
-     * All requests MUST pass through this method.
-     * Ensures:
-     *  - Allure capture
-     *  - Centralized sending logic
-     */
-    private Response sendRequestWithAllure(RequestSpecification spec, HttpMethod method, String path) {
+    private Response sendRequest(RequestSpecification spec,
+                                 HttpMethod method,
+                                 String path) {
 
         return switch (method) {
+
             case GET -> given()
                     .filter(AllureRestAssuredFilter.get())
                     .spec(spec)
