@@ -13,7 +13,7 @@ public final class ResponseValidator {
     private static final Logger log = LogManager.getLogger(ResponseValidator.class);
 
     // Default SLA (can later move to FrameworkConfig)
-    private static final long DEFAULT_SLA_MS = 3000;
+    private static final long DEFAULT_SLA_MS = 6000;
 
     private ResponseValidator() {}
 

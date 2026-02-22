@@ -35,7 +35,7 @@ public final class RequestSpecFactory {
                 );
 
         RequestSpecBuilder builder = new RequestSpecBuilder()
-                .setContentType(ContentType.JSON)
+//                .setContentType(ContentType.JSON)
                 .setAccept(ContentType.JSON)
                 .setConfig(raConfig)
                 .addHeader("User-Agent", "RestAssured-Enterprise-Framework")

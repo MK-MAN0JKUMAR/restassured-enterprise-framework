@@ -78,13 +78,24 @@ public abstract class BaseApiClient {
             spec.queryParams(queryParams);
         }
 
-        if (body != null) {
-            spec.body(body);
-        }
+//
+//        if (body != null) {
+//            spec.body(body);
+//        }
+//
+//        if (multipartFile != null) {
+//            spec.multiPart(multipartFile);
+//        }
+
+
 
         if (multipartFile != null) {
             spec.multiPart(multipartFile);
+        } else if (body != null) {
+            spec.contentType("application/json");
+            spec.body(body);
         }
+
 
         long start = System.currentTimeMillis();
 
