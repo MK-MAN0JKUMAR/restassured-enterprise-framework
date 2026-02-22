@@ -16,4 +16,5 @@ public class PetRequest {
     private List<String> photoUrls;
     private List<Object> tags;
     private String status;
+
 }
