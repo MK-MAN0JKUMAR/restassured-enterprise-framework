@@ -12,7 +12,7 @@ public class CreatePetTest extends BaseTest {
 
     private final PetstoreClient client = new PetstoreClient();
 
-    @Test
+    @Test(groups = {"petstore", "smoke", "regression"})
     public void shouldCreatePetSuccessfully() {
 
         PetRequest pet = PetstoreDataFactory.validPet();

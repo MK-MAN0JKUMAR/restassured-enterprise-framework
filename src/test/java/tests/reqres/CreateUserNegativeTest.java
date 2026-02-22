@@ -13,7 +13,7 @@ public class CreateUserNegativeTest extends ReqresBaseTest {
 
     private final ReqresClient client = new ReqresClient();
 
-    @Test(groups = {"negative", "regression"})
+    @Test(groups = {"reqres", "negative", "regression"})
     public void shouldReturn400ForInvalidPayload() {
 
         ErrorStubs.stubCreateUserBadRequest();

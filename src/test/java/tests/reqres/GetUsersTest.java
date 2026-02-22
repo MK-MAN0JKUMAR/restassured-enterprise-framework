@@ -13,7 +13,7 @@ public class GetUsersTest extends ReqresBaseTest {
 
     private final ReqresClient client = new ReqresClient();
 
-    @Test(groups = {"smoke", "regression"})
+    @Test(groups = {"reqres", "smoke", "regression"})
     public void shouldFetchUsersList() {
 
         GetUsersStub.stubUsersPage2();

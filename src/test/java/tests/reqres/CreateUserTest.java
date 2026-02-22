@@ -15,7 +15,7 @@ public class CreateUserTest extends ReqresBaseTest {
 
     private final ReqresClient reqresClient = new ReqresClient();
 
-    @Test(groups = {"smoke", "regression"})
+    @Test(groups = {"reqres", "smoke", "regression"})
     public void shouldCreateUserSuccessfully() {
 
         // Arrange
