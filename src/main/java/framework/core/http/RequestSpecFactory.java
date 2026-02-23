@@ -16,7 +16,7 @@ public final class RequestSpecFactory {
     private RequestSpecFactory() {}
 
     /**
-     * Backward compatibility.
+     * Backward compatibility (default = REQRES).
      */
     public static RequestSpecification get() {
         return get(ServiceType.REQRES);
@@ -41,6 +41,7 @@ public final class RequestSpecFactory {
         RequestSpecBuilder builder = new RequestSpecBuilder()
                 .setBaseUri(serviceConfig.getBaseUrl())
                 .setAccept(ContentType.JSON)
+                .setContentType(ContentType.JSON)   // safe default for APIs
                 .setConfig(raConfig)
                 .addHeader("User-Agent", "RestAssured-Enterprise-Framework")
                 .log(LogDetail.URI)
@@ -59,6 +60,9 @@ public final class RequestSpecFactory {
 
             builder.addHeader("Authorization",
                     "Bearer " + serviceConfig.getToken());
+
+            // Apply masking filter ONLY for bearer auth
+            builder.addFilter(new SensitiveHeaderFilter());
         }
     }
 }

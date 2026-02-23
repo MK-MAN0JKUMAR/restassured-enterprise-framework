@@ -3,6 +3,7 @@ package framework.core.http;
 import framework.constants.ServiceType;
 import framework.core.reporting.AllureRestAssuredFilter;
 import framework.core.retry.RetryExecutor;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.logging.log4j.LogManager;
@@ -65,7 +66,7 @@ public abstract class BaseApiClient {
         if (multipartFile != null) {
             spec.multiPart(multipartFile);
         } else if (body != null) {
-            spec.contentType("application/json");
+            spec.contentType(ContentType.JSON);
             spec.body(body);
         }
 
@@ -88,6 +89,7 @@ public abstract class BaseApiClient {
                                  String path) {
 
         return switch (method) {
+
             case GET -> given()
                     .filter(new SensitiveHeaderFilter())
                     .filter(AllureRestAssuredFilter.get())

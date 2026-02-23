@@ -169,26 +169,6 @@ restassured-enterprise-framework/
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 mvn clean test -Denv=qa -Dmock=true
 
 mvn clean test -Denv=qa -Dgroups=regression

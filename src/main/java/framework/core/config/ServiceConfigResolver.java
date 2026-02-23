@@ -21,12 +21,46 @@ public final class ServiceConfigResolver {
         }
 
         String authType = config.getOptional(prefix + ".auth.type", "none");
-        String token = config.getTokenOverride(prefix + ".token");
+        String token = resolveToken(type, authType, prefix);
 
-        if ("bearer".equalsIgnoreCase(authType) && token.isBlank()) {
+        return new ServiceConfig(baseUrl, authType, token);
+    }
+
+    private static String resolveToken(ServiceType type, String authType, String prefix) {
+
+        if (!"bearer".equalsIgnoreCase(authType)) {
+            return "";
+        }
+
+        // Strict enforcement for GitHub
+        if (type == ServiceType.GITHUB) {
+
+            String tokenFromSysProp = System.getProperty(prefix + ".token");
+            String tokenFromEnv = System.getenv("GITHUB_TOKEN");
+
+            String token = firstNonBlank(tokenFromSysProp, tokenFromEnv);
+
+            if (token == null || token.isBlank()) {
+                throw new ConfigException(
+                        "GitHub token must be provided via -Dgithub.token or GITHUB_TOKEN environment variable"
+                );
+            }
+
+            return token;
+        }
+
+        // For other services (if bearer ever used)
+        String token = System.getProperty(prefix + ".token");
+        if (token == null || token.isBlank()) {
             throw new ConfigException("Token required for service: " + type);
         }
 
-        return new ServiceConfig(baseUrl, authType, token);
+        return token;
+    }
+
+    private static String firstNonBlank(String a, String b) {
+        if (a != null && !a.isBlank()) return a;
+        if (b != null && !b.isBlank()) return b;
+        return null;
     }
 }

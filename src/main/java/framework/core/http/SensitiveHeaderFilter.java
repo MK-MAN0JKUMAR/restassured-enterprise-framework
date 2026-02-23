@@ -13,8 +13,12 @@ public class SensitiveHeaderFilter implements Filter {
                            FilterableResponseSpecification responseSpec,
                            FilterContext ctx) {
 
-        if (requestSpec.getHeaders().hasHeaderWithName("Authorization")) {
-            requestSpec.replaceHeader("Authorization", "Bearer ****");
+        // Clone header for logging purpose only
+        String authHeader = requestSpec.getHeaders().getValue("Authorization");
+
+        if (authHeader != null) {
+            requestSpec.removeHeader("Authorization");
+            requestSpec.header("Authorization", authHeader); // restore immediately
         }
 
         return ctx.next(requestSpec, responseSpec);
