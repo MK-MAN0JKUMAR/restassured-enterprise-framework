@@ -41,9 +41,10 @@ public final class RequestSpecFactory {
         RequestSpecBuilder builder = new RequestSpecBuilder()
                 .setBaseUri(serviceConfig.getBaseUrl())
                 .setAccept(ContentType.JSON)
-                .setContentType(ContentType.JSON)   // safe default for APIs
+//                .setContentType(ContentType.JSON)   // safe default for APIs
                 .setConfig(raConfig)
                 .addHeader("User-Agent", "RestAssured-Enterprise-Framework")
+                .addHeader("X-Correlation-Id", framework.core.observability.CorrelationManager.getId())
                 .log(LogDetail.URI)
                 .log(LogDetail.METHOD);
 

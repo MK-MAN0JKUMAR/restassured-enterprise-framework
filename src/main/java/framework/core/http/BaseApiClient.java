@@ -1,6 +1,8 @@
 package framework.core.http;
 
 import framework.constants.ServiceType;
+import framework.core.metrics.MetricsCollector;
+import framework.core.observability.CorrelationManager;
 import framework.core.reporting.AllureRestAssuredFilter;
 import framework.core.retry.RetryExecutor;
 import io.restassured.http.ContentType;
@@ -72,11 +74,15 @@ public abstract class BaseApiClient {
 
         long start = System.currentTimeMillis();
 
+        log.info("Correlation-ID: {}", CorrelationManager.getId());
+
         Response response =
                 RetryExecutor.executeWithRetry(method,
                         () -> sendRequest(spec, method, path));
 
         long duration = System.currentTimeMillis() - start;
+
+        MetricsCollector.record(serviceType, duration);
 
         log.info("HTTP {} {} → {} ({} ms)",
                 method, path, response.statusCode(), duration);
@@ -129,6 +135,8 @@ public abstract class BaseApiClient {
 
         long start = System.currentTimeMillis();
 
+        log.info("Correlation-ID: {}", CorrelationManager.getId());
+
         Response response =
                 RetryExecutor.executeWithRetry(HttpMethod.GET,
                         () -> given()
@@ -140,6 +148,8 @@ public abstract class BaseApiClient {
                 );
 
         long duration = System.currentTimeMillis() - start;
+
+        MetricsCollector.record(serviceType, duration);
 
         log.info("HTTP GET {} → {} ({} ms)",
                 absoluteUrl, response.statusCode(), duration);

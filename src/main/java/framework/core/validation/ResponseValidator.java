@@ -31,8 +31,7 @@ public final class ResponseValidator {
         }
 
         response.then()
-//                .contentType("application/json")
-                .spec(ResponseSpecFactory.successJson())
+                .contentType("application/json")
                 .time(lessThan(DEFAULT_SLA_MS));
     }
 
