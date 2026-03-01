@@ -13,7 +13,8 @@ public final class ResponseValidator {
     private static final Logger log = LogManager.getLogger(ResponseValidator.class);
 
     // Default SLA (can later move to FrameworkConfig)
-    private static final long DEFAULT_SLA_MS = 6000;
+    private static final long DEFAULT_SLA_MS =
+            Long.parseLong(System.getProperty("default.sla.ms", "6000"));
 
     private ResponseValidator() {}
 
@@ -30,7 +31,8 @@ public final class ResponseValidator {
         }
 
         response.then()
-                .contentType("application/json")
+//                .contentType("application/json")
+                .spec(ResponseSpecFactory.successJson())
                 .time(lessThan(DEFAULT_SLA_MS));
     }
 
@@ -100,6 +102,8 @@ public final class ResponseValidator {
         clientError(response, expectedStatus);
         schema(response, schemaPath);
     }
+
+    // ========================= RESPONSE TIME =========================
 
     public static void assertResponseTime(Response response, long maxMillis) {
 
