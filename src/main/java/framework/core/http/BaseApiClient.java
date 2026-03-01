@@ -4,6 +4,8 @@ import framework.constants.ServiceType;
 import framework.core.metrics.MetricsCollector;
 import framework.core.observability.CorrelationManager;
 import framework.core.reporting.AllureRestAssuredFilter;
+import framework.core.resilience.CircuitBreaker;
+import framework.core.resilience.CircuitBreakerRegistry;
 import framework.core.retry.RetryExecutor;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -18,8 +20,7 @@ import static io.restassured.RestAssured.given;
 
 public abstract class BaseApiClient {
 
-    private static final Logger log =
-            LogManager.getLogger(BaseApiClient.class);
+    private static final Logger log = LogManager.getLogger(BaseApiClient.class);
 
     private final ServiceType serviceType;
 
@@ -47,15 +48,9 @@ public abstract class BaseApiClient {
         return execute(HttpMethod.PATCH, path, body, null, null, null);
     }
 
-    protected Response execute(HttpMethod method,
-                               String path,
-                               Object body,
-                               Map<String, ?> pathParams,
-                               Map<String, ?> queryParams,
-                               File multipartFile) {
+    protected Response execute(HttpMethod method, String path, Object body, Map<String, ?> pathParams, Map<String, ?> queryParams, File multipartFile) {
 
-        RequestSpecification spec =
-                RequestSpecFactory.get(serviceType);
+        RequestSpecification spec = RequestSpecFactory.get(serviceType);
 
         if (pathParams != null && !pathParams.isEmpty()) {
             spec.pathParams(pathParams);
@@ -76,83 +71,67 @@ public abstract class BaseApiClient {
 
         log.info("Correlation-ID: {}", CorrelationManager.getId());
 
-        Response response =
-                RetryExecutor.executeWithRetry(method,
-                        () -> sendRequest(spec, method, path));
+        // Circuit Breaker lookup
+        CircuitBreaker breaker = CircuitBreakerRegistry.get(serviceType);
+
+        if (!breaker.allowRequest()) {
+            throw new IllegalStateException("Circuit breaker OPEN for service: " + serviceType);
+        }
+
+        Response response = RetryExecutor.executeWithRetry(method, () -> sendRequest(spec, method, path));
+
+        // Record breaker outcome
+        if (response.statusCode() >= 500) {
+            breaker.recordFailure();
+        } else {
+            breaker.recordSuccess();
+        }
 
         long duration = System.currentTimeMillis() - start;
 
         MetricsCollector.record(serviceType, duration);
 
-        log.info("HTTP {} {} → {} ({} ms)",
-                method, path, response.statusCode(), duration);
+        log.info("HTTP {} {} → {} ({} ms)", method, path, response.statusCode(), duration);
 
         return response;
     }
 
-    private Response sendRequest(RequestSpecification spec,
-                                 HttpMethod method,
-                                 String path) {
+    private Response sendRequest(RequestSpecification spec, HttpMethod method, String path) {
 
         return switch (method) {
 
-            case GET -> given()
-                    .filter(new SensitiveHeaderFilter())
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when().get(path);
+            case GET ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().get(path);
 
-            case POST -> given()
-                    .filter(new SensitiveHeaderFilter())
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when().post(path);
+            case POST ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().post(path);
 
-            case PUT -> given()
-                    .filter(new SensitiveHeaderFilter())
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when().put(path);
+            case PUT ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().put(path);
 
-            case DELETE -> given()
-                    .filter(new SensitiveHeaderFilter())
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when().delete(path);
+            case DELETE ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().delete(path);
 
-            case PATCH -> given()
-                    .filter(new SensitiveHeaderFilter())
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when().patch(path);
+            case PATCH ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().patch(path);
         };
     }
 
     protected Response getAbsolute(String absoluteUrl) {
 
-        RequestSpecification spec =
-                RequestSpecFactory.get(serviceType);
+        RequestSpecification spec = RequestSpecFactory.get(serviceType);
 
         long start = System.currentTimeMillis();
 
         log.info("Correlation-ID: {}", CorrelationManager.getId());
 
-        Response response =
-                RetryExecutor.executeWithRetry(HttpMethod.GET,
-                        () -> given()
-                                .filter(new SensitiveHeaderFilter())
-                                .filter(AllureRestAssuredFilter.get())
-                                .spec(spec)
-                                .when()
-                                .get(absoluteUrl)
-                );
+        Response response = RetryExecutor.executeWithRetry(HttpMethod.GET, () -> given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().get(absoluteUrl));
 
         long duration = System.currentTimeMillis() - start;
 
         MetricsCollector.record(serviceType, duration);
 
-        log.info("HTTP GET {} → {} ({} ms)",
-                absoluteUrl, response.statusCode(), duration);
+        log.info("HTTP GET {} → {} ({} ms)", absoluteUrl, response.statusCode(), duration);
 
         return response;
     }
