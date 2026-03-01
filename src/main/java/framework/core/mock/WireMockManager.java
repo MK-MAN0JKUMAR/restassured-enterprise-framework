@@ -2,15 +2,21 @@ package framework.core.mock;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 public final class WireMockManager {
 
     private static WireMockServer SERVER;
 
+    private static final AtomicInteger ACTIVE_USERS = new AtomicInteger(0);
+
     private WireMockManager() {}
 
     public static synchronized void start() {
+
+        ACTIVE_USERS.incrementAndGet();
 
         if (SERVER != null && SERVER.isRunning()) {
             return;
@@ -23,6 +29,12 @@ public final class WireMockManager {
     }
 
     public static synchronized void stop() {
+
+        int remaining = ACTIVE_USERS.decrementAndGet();
+
+        if (remaining > 0) {
+            return;
+        }
 
         if (SERVER != null && SERVER.isRunning()) {
             int port = SERVER.port();
