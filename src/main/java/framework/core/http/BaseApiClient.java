@@ -1,6 +1,7 @@
 package framework.core.http;
 
 import framework.constants.ServiceType;
+import framework.core.chaos.ChaosInjector;
 import framework.core.metrics.MetricsCollector;
 import framework.core.observability.CorrelationManager;
 import framework.core.reporting.AllureRestAssuredFilter;
@@ -78,7 +79,13 @@ public abstract class BaseApiClient {
             throw new IllegalStateException("Circuit breaker OPEN for service: " + serviceType);
         }
 
-        Response response = RetryExecutor.executeWithRetry(method, () -> sendRequest(spec, method, path));
+//        Response response = RetryExecutor.executeWithRetry(method, () -> sendRequest(spec, method, path));
+
+        Response response = RetryExecutor.executeWithRetry(method, () -> {
+                            // Chaos injection BEFORE request
+                            ChaosInjector.inject(serviceType);
+                            return sendRequest(spec, method, path);
+                        });
 
         // Record breaker outcome
         if (response.statusCode() >= 500) {
