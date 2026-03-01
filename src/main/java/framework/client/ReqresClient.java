@@ -56,4 +56,8 @@ public class ReqresClient extends BaseApiClient {
     public Response getUsersPage(int page) {
         return get(String.format(ReqresEndpoints.USERS_PAGE, page));
     }
+
+    public Response retryTestEndpoint() {
+        return get("/retry-test");
+    }
 }

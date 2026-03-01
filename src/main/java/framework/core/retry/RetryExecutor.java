@@ -22,8 +22,12 @@ public final class RetryExecutor {
 
         int attempt = 0;
 
+        RetryContext.reset();
+
         while (true) {
             try {
+
+                RetryContext.increment();
 
                 Response response = requestCall.get();
                 int status = response.statusCode();
