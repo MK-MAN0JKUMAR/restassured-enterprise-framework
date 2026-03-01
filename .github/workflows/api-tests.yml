@@ -1,40 +1,79 @@
-name: API Automation Tests
+name: API Automation Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
-  run-api-tests:
+
+  api-tests:
+
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        profile:
+          - name: smoke-stable
+            groups: "smoke"
+            chaos: "false"
+
+          - name: full-regression
+            groups: ""
+            chaos: "false"
+
+          - name: chaos-resilience
+            groups: "smoke"
+            chaos: "true"
+
+    name: ${{ matrix.profile.name }}
 
     steps:
 
-      # Checkout repository
-      - name: Checkout code
+      # Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Setup Java 17
+      # Setup Java (upgrade to 21 for long-term support)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
           cache: maven
 
-      # Run Maven tests (mock mode for CI stability)
-      - name: Run API tests
-        run: mvn -B clean test -Denv=qa -Dmock=true
+      # Run Tests
+      - name: Run API Tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_API_TOKEN }}
+          GITHUB_USERNAME: ${{ secrets.GH_USERNAME }}
+        run: |
+          mvn -B clean test \
+            -Denv=qa \
+            -Dgroups=${{ matrix.profile.groups }} \
+            -Dchaos.enabled=${{ matrix.profile.chaos }} \
+            -Dchaos.failure.rate=0.2 \
+            -Dchaos.latency.ms=200
 
-      # Generate Allure report
+      # Generate Allure Report
       - name: Generate Allure Report
+        if: always()
         run: mvn allure:report
 
-      # Upload Allure HTML report as artifact
+      # Upload Allure HTML report
       - name: Upload Allure Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-report
+          name: allure-report-${{ matrix.profile.name }}
           path: target/site/allure-maven-plugin
+
+      # Upload Surefire XML results (for debugging)
+      - name: Upload Surefire Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-results-${{ matrix.profile.name }}
+          path: target/surefire-reports
