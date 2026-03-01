@@ -121,4 +121,29 @@ public abstract class BaseApiClient {
                     .when().patch(path);
         };
     }
+
+    protected Response getAbsolute(String absoluteUrl) {
+
+        RequestSpecification spec =
+                RequestSpecFactory.get(serviceType);
+
+        long start = System.currentTimeMillis();
+
+        Response response =
+                RetryExecutor.executeWithRetry(HttpMethod.GET,
+                        () -> given()
+                                .filter(new SensitiveHeaderFilter())
+                                .filter(AllureRestAssuredFilter.get())
+                                .spec(spec)
+                                .when()
+                                .get(absoluteUrl)
+                );
+
+        long duration = System.currentTimeMillis() - start;
+
+        log.info("HTTP GET {} → {} ({} ms)",
+                absoluteUrl, response.statusCode(), duration);
+
+        return response;
+    }
 }

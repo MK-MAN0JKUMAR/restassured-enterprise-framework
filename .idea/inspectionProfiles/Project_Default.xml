@@ -4,13 +4,16 @@
     <inspection_tool class="groupsTestNG" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="groups">
         <value>
-          <list size="6">
+          <list size="9">
             <item index="0" class="java.lang.String" itemvalue="smoke" />
             <item index="1" class="java.lang.String" itemvalue="negative" />
             <item index="2" class="java.lang.String" itemvalue="regression" />
             <item index="3" class="java.lang.String" itemvalue="petstore" />
             <item index="4" class="java.lang.String" itemvalue="reqres" />
             <item index="5" class="java.lang.String" itemvalue="github" />
+            <item index="6" class="java.lang.String" itemvalue="github-negative" />
+            <item index="7" class="java.lang.String" itemvalue="resilience" />
+            <item index="8" class="java.lang.String" itemvalue="pagination" />
           </list>
         </value>
       </option>

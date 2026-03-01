@@ -26,4 +26,12 @@ public class GitHubClient extends BaseApiClient {
     public Response deleteRepo(String owner, String repoName) {
         return delete("/repos/" + owner + "/" + repoName);
     }
+
+    public Response listRepos(int perPage) {
+        return get("/user/repos?per_page=" + perPage);
+    }
+
+    public Response fetchNextPage(String absoluteUrl) {
+        return getAbsolute(absoluteUrl);
+    }
 }
