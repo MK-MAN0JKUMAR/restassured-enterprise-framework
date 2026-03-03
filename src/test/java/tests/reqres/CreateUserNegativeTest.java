@@ -9,11 +9,11 @@ import org.testng.annotations.Test;
 import tests.base.BaseTest;
 import tests.reqres.stubs.ErrorStubs;
 
-public class CreateUserNegativeTest extends BaseTest {
+public class CreateUserNegativeTest extends ReqresBaseTest {
 
     private final ReqresClient client = new ReqresClient();
 
-    @Test(groups = {"negative", "regression"})
+    @Test(groups = {"reqres", "negative", "regression"})
     public void shouldReturn400ForInvalidPayload() {
 
         ErrorStubs.stubCreateUserBadRequest();

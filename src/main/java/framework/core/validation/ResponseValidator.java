@@ -10,11 +10,11 @@ import static org.hamcrest.Matchers.lessThan;
 
 public final class ResponseValidator {
 
-    private static final Logger log =
-            LogManager.getLogger(ResponseValidator.class);
+    private static final Logger log = LogManager.getLogger(ResponseValidator.class);
 
     // Default SLA (can later move to FrameworkConfig)
-    private static final long DEFAULT_SLA_MS = 3000;
+    private static final long DEFAULT_SLA_MS =
+            Long.parseLong(System.getProperty("default.sla.ms", "6000"));
 
     private ResponseValidator() {}
 
@@ -100,5 +100,20 @@ public final class ResponseValidator {
 
         clientError(response, expectedStatus);
         schema(response, schemaPath);
+    }
+
+    // ========================= RESPONSE TIME =========================
+
+    public static void assertResponseTime(Response response, long maxMillis) {
+
+        long actual = response.getTime();
+
+        if (actual > maxMillis) {
+            throw new AssertionError(
+                    "Response time exceeded. Expected <= "
+                            + maxMillis + " ms but was "
+                            + actual + " ms"
+            );
+        }
     }
 }

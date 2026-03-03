@@ -1,6 +1,9 @@
 package framework.core.http;
 
+import framework.constants.ServiceType;
 import framework.core.config.FrameworkConfig;
+import framework.core.config.ServiceConfig;
+import framework.core.config.ServiceConfigResolver;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
@@ -12,58 +15,55 @@ public final class RequestSpecFactory {
 
     private RequestSpecFactory() {}
 
+    /**
+     * Backward compatibility (default = REQRES).
+     */
     public static RequestSpecification get() {
-        return buildBaseSpec();
+        return get(ServiceType.REQRES);
     }
 
-    private static RequestSpecification buildBaseSpec() {
+    public static RequestSpecification get(ServiceType serviceType) {
 
-        FrameworkConfig config = FrameworkConfig.get();
+        ServiceConfig serviceConfig =
+                ServiceConfigResolver.resolve(serviceType);
+
+        FrameworkConfig globalConfig =
+                FrameworkConfig.get();
 
         RestAssuredConfig raConfig = RestAssuredConfig.config()
                 .httpClient(HttpClientConfig.httpClientConfig()
-                        .setParam("http.connection.timeout", config.getConnectTimeout())
-                        .setParam("http.socket.timeout", config.getReadTimeout())
+                        .setParam("http.connection.timeout",
+                                globalConfig.getInt("connect.timeout"))
+                        .setParam("http.socket.timeout",
+                                globalConfig.getInt("read.timeout"))
                 );
 
         RequestSpecBuilder builder = new RequestSpecBuilder()
-                .setBaseUri(resolveBaseUrl(config))
-                .setContentType(ContentType.JSON)
+                .setBaseUri(serviceConfig.getBaseUrl())
                 .setAccept(ContentType.JSON)
+//                .setContentType(ContentType.JSON)   // safe default for APIs
                 .setConfig(raConfig)
-                .addHeader("User-Agent",
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36")
-                .addHeader("Accept-Language", "en-US,en;q=0.9")
+                .addHeader("User-Agent", "RestAssured-Enterprise-Framework")
+                .addHeader("X-Correlation-Id", framework.core.observability.CorrelationManager.getId())
                 .log(LogDetail.URI)
                 .log(LogDetail.METHOD);
 
-        applyAuth(builder, config);
+        applyAuth(builder, serviceConfig);
 
         return builder.build();
     }
 
-    private static String resolveBaseUrl(FrameworkConfig config) {
+    private static void applyAuth(RequestSpecBuilder builder,
+                                  ServiceConfig serviceConfig) {
 
-        if (config.isMockMode()) {
-            return framework.core.mock.WireMockManager.baseUrl();
-        }
+        if ("bearer".equalsIgnoreCase(serviceConfig.getAuthType())
+                && !serviceConfig.getToken().isBlank()) {
 
-        return config.getBaseUrl();
-    }
+            builder.addHeader("Authorization",
+                    "Bearer " + serviceConfig.getToken());
 
-    private static void applyAuth(RequestSpecBuilder builder, FrameworkConfig config) {
-
-        switch (config.getAuthType().toLowerCase()) {
-
-            case "bearer":
-                if (!config.getToken().isBlank()) {
-                    builder.addHeader("Authorization", "Bearer " + config.getToken());
-                }
-                break;
-
-            case "none":
-            default:
-                break;
+            // Apply masking filter ONLY for bearer auth
+            builder.addFilter(new SensitiveHeaderFilter());
         }
     }
 }

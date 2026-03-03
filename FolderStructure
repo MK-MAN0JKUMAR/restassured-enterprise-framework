@@ -1,5 +1,3 @@
-
-
 restassured-enterprise-framework/
 ├── .allure
 ├── .github
@@ -13,9 +11,11 @@ restassured-enterprise-framework/
 │   │   			└── framework/
 │   │       				│
 │   │       				├── client/
+│   │       				│       ├── PetstoreClient.java
 │   │       				│		└── ReqresClient.java
 │   │       				│
 │   │       				├── constants/
+│   │       				│       ├── PetstoreEndpoints.java
 │   │       				│		└── ReqresEndpoints.java
 │   │       				│
 │   │       				├── core/
@@ -42,19 +42,47 @@ restassured-enterprise-framework/
 │   │       				│				└── ResponseValidator.java
 │   │       				│
 │   │       				├── data/
-│   │       				│       └──reqres/
-│   │       				│		        └── ReqresDataFactory.java
+│   │       				│		├── github/
+│   │                       │       │        ├──builders/
+│   │       				│		│        │         └── RepoBuilder.java
+│   │       				│		│        └── GitHubDataFactory.java
+│   │       				│		│
+│   │       				│		├── petstore/
+│   │                       │       │        ├──builders/
+│   │       				│		│        │         └── PetBuilder.java
+│   │       				│		│        └── PetstoreDataFactory.java
+│   │       				│		│
+│   │       				│		│
+│   │       				│		│
+│   │       				│		├── reqres/
+│   │                       │       │        ├──builders/
+│   │       				│		│        │         └── ReqresUserBuilder.java
+│   │       				│		│        └── ReqresDataFactory.java
+│   │       				│		│
+│   │       				│		├──DataContext.java
+│   │       				│		│
+│   │       				│       └──DataSeedManager.java
+│   │       				│
 │   │       				│
 │   │       				├── domain/
 │   │       				│		├── common/
 │   │       				│		│		└── ErrorResponse.java
+│   │       				│		├── github/
+│   │       				│		│		├── CreateRepoRequest.java
+│   │       				│		│		├── PaginationResponse.java
+│   │       				│		│		└── RepoResponse.java
+│   │                       │       │
+│   │       				│		├── petstore/
+│   │       				│		│		├── Category.java
+│   │       				│		│		├── PetRequest.java
+│   │       				│		│		└── PetResponse.java
+│   │                       │       │
 │   │       				│		└── reqres/
 │   │       				│				├── CreateUserRequest.java
 │   │       				│				├── CreateUserResponse.java
 │   │       				│				└── GetUserResponse.java
 │   │                       │
 │   │       				└── utils (empty)
-│   │
 │   │
 │   └── test/
 │       │
@@ -65,11 +93,17 @@ restassured-enterprise-framework/
 │       │    			├── base/
 │       │    			│		└── BaseTest.java
 │       │    			│
-│       │    			├── github (project 3 later)
+│       │    			├── github/ (project 3 start now)- now start working on this
 │       │    			│
-│       │    			├── petstore (project 2 later)
+│       │    			├── petstore/ (project 2 done/completed)
+│       │    			│		│
+│       │    			│		├── CreateGetDeletePetFlowTest.java
+│    	│				│		├── CreatePetNegativeTest.java
+│    	│				│		├── CreatePetTest.java
+│    	│				│		├── FindPetByStatusTest.java
+│    	│				│		└── UploadPetImageTest.java
 │       │    			│
-│       │    			└── reqres/ (project 1 working)
+│       │    			└── reqres/ (project 1 done/completed)
 │       │    					│
 │       │    					├── stubs/
 │       │    					│		├── CreateUserStub.java
@@ -78,7 +112,8 @@ restassured-enterprise-framework/
 │       │    			 		│
 │    	│						├── CreateUserNegativeTest.java
 │    	│						├── CreateUserTest.java
-│    	│						└── GetUsersTest.java
+│    	│						├── GetUsersTest.java
+│    	│						└── ReqresBaseTest.java
 │    	│
 │   	└── resources/
 │       		│
@@ -91,10 +126,19 @@ restassured-enterprise-framework/
 │       		│
 │      			├── payloads(empty)
 │       		│
-│       		└──  schemas/
-│              		        └──reqres/
-│                   	   			├── create-users-response.json
-│       	   		               	└── get-users-response.json
+│       		└── schemas/
+│                       │
+│           			├── petstore/
+│           			│		├── create-pet-response.json
+│    					│		├── error-response.json
+│    					│		├── find-by-status-response.json
+│    					│		└── get-pet-response.json
+│    					│
+│              		    ├── reqres/
+│                   	│   	├── create-users-response.json
+│       	   		    │       └── get-users-response.json
+│                       │
+│              		    └── sample-image.jpg
 │
 ├── target
 ├── .gitignore
@@ -102,26 +146,6 @@ restassured-enterprise-framework/
 ├── FolderStructure
 ├── testng.xml
 └── pom.xml
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

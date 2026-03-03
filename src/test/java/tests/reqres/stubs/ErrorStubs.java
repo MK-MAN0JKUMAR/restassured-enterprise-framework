@@ -12,7 +12,7 @@ public final class ErrorStubs {
 
         WireMockManager.getServer().stubFor(
                 post(urlEqualTo("/users"))
-                        .atPriority(1)   // highest priority
+                        .atPriority(10)
                         .willReturn(
                                 aResponse()
                                         .withStatus(400)

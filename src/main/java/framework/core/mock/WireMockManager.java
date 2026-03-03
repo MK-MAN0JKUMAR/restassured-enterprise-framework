@@ -2,54 +2,62 @@ package framework.core.mock;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 public final class WireMockManager {
 
-    private static final ThreadLocal<WireMockServer> SERVER = new ThreadLocal<>();
+    private static WireMockServer SERVER;
+
+    private static final AtomicInteger ACTIVE_USERS = new AtomicInteger(0);
 
     private WireMockManager() {}
 
-    public static void start() {
+    public static synchronized void start() {
 
-        if (SERVER.get() != null && SERVER.get().isRunning()) {
+        ACTIVE_USERS.incrementAndGet();
+
+        if (SERVER != null && SERVER.isRunning()) {
             return;
         }
 
-        WireMockServer server = new WireMockServer(options().dynamicPort());
-        server.start();
+        SERVER = new WireMockServer(options().dynamicPort());
+        SERVER.start();
 
-        SERVER.set(server);
-
-        System.out.println("WireMock started on port: " + server.port()
-                + " | Thread: " + Thread.currentThread().getId());
+        System.out.println("WireMock started on port: " + SERVER.port());
     }
 
-    public static void stop() {
-        WireMockServer server = SERVER.get();
+    public static synchronized void stop() {
 
-        if (server != null) {
-            int port = server.port();
+        int remaining = ACTIVE_USERS.decrementAndGet();
 
-            if (server.isRunning()) {
-                server.stop();
-            }
-
-            System.out.println("WireMock stopped on port: "
-                    + port + " | Thread: " + Thread.currentThread().getId());
+        if (remaining > 0) {
+            return;
         }
-        SERVER.remove();
+
+        if (SERVER != null && SERVER.isRunning()) {
+            int port = SERVER.port();
+            SERVER.stop();
+            System.out.println("WireMock stopped on port: " + port);
+        }
+
+        SERVER = null;
+    }
+
+    public static boolean isRunning() {
+        return SERVER != null && SERVER.isRunning();
     }
 
     public static WireMockServer getServer() {
 
-        WireMockServer server = SERVER.get();
-
-        if (server == null || !server.isRunning()) {
-            throw new IllegalStateException("WireMock not started for this thread");
+        if (!isRunning()) {
+            throw new IllegalStateException(
+                    "WireMock server not started. Did you forget @BeforeClass?"
+            );
         }
 
-        return server;
+        return SERVER;
     }
 
     public static String baseUrl() {

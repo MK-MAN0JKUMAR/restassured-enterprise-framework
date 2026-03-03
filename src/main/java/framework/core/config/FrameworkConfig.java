@@ -1,7 +1,6 @@
 package framework.core.config;
 
 import framework.core.exception.ConfigException;
-import framework.core.mock.WireMockManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,47 +16,24 @@ public final class FrameworkConfig {
     private static final String DEFAULT_ENV = "qa";
     private static final String CONFIG_PATH = "config/";
 
-    /**
-     * Eager immutable load → enterprise-safe for parallel execution.
-     */
     private static final FrameworkConfig INSTANCE = load();
 
     private final String env;
-    private final boolean mockMode;
-    private final String baseUrl;
-    private final int connectTimeout;
-    private final int readTimeout;
-    private final String authType;
-    private final String token;
+    private final Properties properties;
 
-    private FrameworkConfig(
-            String env,
-            boolean mockMode,
-            String baseUrl,
-            int connectTimeout,
-            int readTimeout,
-            String authType,
-            String token
-    ) {
+    private FrameworkConfig(String env, Properties properties) {
         this.env = env;
-        this.mockMode = mockMode;
-        this.baseUrl = baseUrl;
-        this.connectTimeout = connectTimeout;
-        this.readTimeout = readTimeout;
-        this.authType = authType;
-        this.token = token;
+        this.properties = properties;
     }
 
     private static FrameworkConfig load() {
 
-        // -------- ENV RESOLUTION --------
         String env = System.getProperty("env", DEFAULT_ENV).toLowerCase();
 
         if (!ALLOWED_ENVS.contains(env)) {
             throw new ConfigException("Invalid environment: " + env + ". Allowed: " + ALLOWED_ENVS);
         }
 
-        // -------- LOAD PROPERTY FILE --------
         String fileName = CONFIG_PATH + env + ".properties";
         Properties props = new Properties();
 
@@ -74,42 +50,13 @@ public final class FrameworkConfig {
             throw new ConfigException("Failed to load config file: " + fileName, e);
         }
 
-        // -------- MOCK MODE --------
-        boolean mockMode = Boolean.parseBoolean(System.getProperty("mock", "false"));
-
-        // -------- BASE URL RESOLUTION --------
-        String baseUrl;
-
-        if (mockMode) {
-            baseUrl = null; // will be resolved per thread dynamically
-        } else {
-            baseUrl = System.getProperty("base.url", require(props, "base.url"));
-        }
-
-        // -------- OTHER CONFIG --------
-        int connectTimeout = Integer.parseInt(require(props, "connect.timeout"));
-        int readTimeout = Integer.parseInt(require(props, "read.timeout"));
-        String authType = require(props, "auth.type");
-
-        // CLI override for secrets (CI-safe)
-        String token = System.getProperty("token", props.getProperty("token", ""));
-
-        FrameworkConfig config = new FrameworkConfig(
-                env, mockMode, baseUrl, connectTimeout, readTimeout, authType, token
-        );
-
-        // -------- STARTUP LOGGING --------
         log.info("========== Framework Configuration ==========");
-        log.info("Environment      : {}", config.env);
-        log.info("Mock Mode        : {}", config.mockMode);
-        log.info("Base URL         : {}", config.baseUrl);
-        log.info("Connect Timeout  : {} ms", config.connectTimeout);
-        log.info("Read Timeout     : {} ms", config.readTimeout);
-        log.info("Auth Type        : {}", config.authType);
-        log.info("Token Provided   : {}", !config.token.isBlank());
+        log.info("Environment      : {}", env);
+        log.info("Connect Timeout  : {} ms", require(props, "connect.timeout"));
+        log.info("Read Timeout     : {} ms", require(props, "read.timeout"));
         log.info("=============================================");
 
-        return config;
+        return new FrameworkConfig(env, props);
     }
 
     private static String require(Properties props, String key) {
@@ -124,19 +71,23 @@ public final class FrameworkConfig {
         return INSTANCE;
     }
 
-    // -------- GETTERS --------
+    public String getEnv() {
+        return env;
+    }
 
-    public String getEnv() { return env; }
+    public String getRequired(String key) {
+        return require(properties, key);
+    }
 
-    public boolean isMockMode() { return mockMode; }
+    public String getOptional(String key, String defaultValue) {
+        return properties.getProperty(key, defaultValue);
+    }
 
-    public String getBaseUrl() { return baseUrl; }
+    public int getInt(String key) {
+        return Integer.parseInt(getRequired(key));
+    }
 
-    public int getConnectTimeout() { return connectTimeout; }
-
-    public int getReadTimeout() { return readTimeout; }
-
-    public String getAuthType() { return authType; }
-
-    public String getToken() { return token; }
+    public String getTokenOverride(String key) {
+        return System.getProperty(key, properties.getProperty(key, ""));
+    }
 }

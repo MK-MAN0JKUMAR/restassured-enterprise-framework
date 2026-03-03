@@ -11,11 +11,11 @@ import org.testng.annotations.Test;
 import tests.base.BaseTest;
 import tests.reqres.stubs.CreateUserStub;
 
-public class CreateUserTest extends BaseTest {
+public class CreateUserTest extends ReqresBaseTest {
 
     private final ReqresClient reqresClient = new ReqresClient();
 
-    @Test(groups = {"smoke", "regression"})
+    @Test(groups = {"reqres", "smoke", "regression"})
     public void shouldCreateUserSuccessfully() {
 
         // Arrange
