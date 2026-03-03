@@ -1,5 +1,6 @@
 package framework.data.reqres;
 
+import framework.data.DataSeedManager;
 import framework.domain.reqres.CreateUserRequest;
 
 import java.util.UUID;
@@ -10,7 +11,7 @@ public final class ReqresDataFactory {
 
     public static CreateUserRequest createRandomUser() {
         return CreateUserRequest.builder()
-                .name("user-" + UUID.randomUUID().toString().substring(0, 6))
+                .name("user-" + DataSeedManager.random().nextInt(10000))
                 .job("leader")
                 .build();
     }
