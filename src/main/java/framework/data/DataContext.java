@@ -25,7 +25,14 @@ public final class DataContext {
         return seed + "_" + threadId;
     }
 
-    public String timeBasedSuffix() {
-        return uniqueSuffix() + "_" + timestamp;
+    // ---------------- CI SAFE UNIQUE SUFFIX ----------------
+    public String ciSafeSuffix() {
+        String runId = System.getenv("GITHUB_RUN_ID");
+
+        if (runId == null || runId.isBlank()) {
+            runId = String.valueOf(timestamp);
+        }
+
+        return uniqueSuffix() + "_" + runId;
     }
 }

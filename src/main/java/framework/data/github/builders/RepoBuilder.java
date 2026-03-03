@@ -57,6 +57,6 @@ public class RepoBuilder {
     }
 
     private String generateDeterministicName(String prefix) {
-        return prefix + "-" + DataContext.get().uniqueSuffix();
+        return prefix + "-" + DataContext.get().ciSafeSuffix();
     }
 }
