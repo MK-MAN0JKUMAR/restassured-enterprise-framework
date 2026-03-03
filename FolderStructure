@@ -1,15 +1,21 @@
-
-
 restassured-enterprise-framework/
-│
+├── .allure
+├── .github
+├── .idea
+├── .mvn
 ├── src/
 │   ├── main/
+│   │		│
 │   │   	└── java/
+│   │       		│
 │   │   			└── framework/
+│   │       				│
 │   │       				├── client/
+│   │       				│       ├── PetstoreClient.java
 │   │       				│		└── ReqresClient.java
 │   │       				│
 │   │       				├── constants/
+│   │       				│       ├── PetstoreEndpoints.java
 │   │       				│		└── ReqresEndpoints.java
 │   │       				│
 │   │       				├── core/
@@ -28,31 +34,77 @@ restassured-enterprise-framework/
 │   │       				│		├── reporting/
 │   │       				│		│		└── AllureRestAssuredFilter.java
 │   │       				│		├── retry/
-│   │       				│		│		└── RetryException.java
+│   │       				│		│		└── RetryExecutor.java
 │   │       				│		├── schema/
 │   │       				│		│		├── JsonSchemaValidator.java
 │   │       				│		│		└── SchemaLoader.java
 │   │       				│		└── validation/
 │   │       				│				└── ResponseValidator.java
 │   │       				│
-│   │       				├── data.reqres/
-│   │       				│		└── ReqresDataFactory.java
+│   │       				├── data/
+│   │       				│		├── github/
+│   │                       │       │        ├──builders/
+│   │       				│		│        │         └── RepoBuilder.java
+│   │       				│		│        └── GitHubDataFactory.java
+│   │       				│		│
+│   │       				│		├── petstore/
+│   │                       │       │        ├──builders/
+│   │       				│		│        │         └── PetBuilder.java
+│   │       				│		│        └── PetstoreDataFactory.java
+│   │       				│		│
+│   │       				│		│
+│   │       				│		│
+│   │       				│		├── reqres/
+│   │                       │       │        ├──builders/
+│   │       				│		│        │         └── ReqresUserBuilder.java
+│   │       				│		│        └── ReqresDataFactory.java
+│   │       				│		│
+│   │       				│		├──DataContext.java
+│   │       				│		│
+│   │       				│       └──DataSeedManager.java
 │   │       				│
-│   │       				└──  modules/
-│   │       						├── common/
-│   │       						│		└── ErrorResponse.java
-│   │       						└── reqres/
-│   │       								├── CreateUserRequest.java
-│   │       								├── CreateUserResponse.java
-│   │       								└── GetUserResponse.java
+│   │       				│
+│   │       				├── domain/
+│   │       				│		├── common/
+│   │       				│		│		└── ErrorResponse.java
+│   │       				│		├── github/
+│   │       				│		│		├── CreateRepoRequest.java
+│   │       				│		│		├── PaginationResponse.java
+│   │       				│		│		└── RepoResponse.java
+│   │                       │       │
+│   │       				│		├── petstore/
+│   │       				│		│		├── Category.java
+│   │       				│		│		├── PetRequest.java
+│   │       				│		│		└── PetResponse.java
+│   │                       │       │
+│   │       				│		└── reqres/
+│   │       				│				├── CreateUserRequest.java
+│   │       				│				├── CreateUserResponse.java
+│   │       				│				└── GetUserResponse.java
+│   │                       │
+│   │       				└── utils (empty)
 │   │
 │   └── test/
+│       │
 │       ├── java/
+│       │		│
 │       │		└── tests/
+│       │    			│
 │       │    			├── base/
 │       │    			│		└── BaseTest.java
 │       │    			│
-│       │    			└── reqres/
+│       │    			├── github/ (project 3 start now)- now start working on this
+│       │    			│
+│       │    			├── petstore/ (project 2 done/completed)
+│       │    			│		│
+│       │    			│		├── CreateGetDeletePetFlowTest.java
+│    	│				│		├── CreatePetNegativeTest.java
+│    	│				│		├── CreatePetTest.java
+│    	│				│		├── FindPetByStatusTest.java
+│    	│				│		└── UploadPetImageTest.java
+│       │    			│
+│       │    			└── reqres/ (project 1 done/completed)
+│       │    					│
 │       │    					├── stubs/
 │       │    					│		├── CreateUserStub.java
 │       │    					│		├── ErrorStubs.java
@@ -60,21 +112,60 @@ restassured-enterprise-framework/
 │       │    			 		│
 │    	│						├── CreateUserNegativeTest.java
 │    	│						├── CreateUserTest.java
-│    	│						└── GetUsersTest.java
+│    	│						├── GetUsersTest.java
+│    	│						└── ReqresBaseTest.java
 │    	│
 │   	└── resources/
+│       		│
+│      			├── _files(auto-generated)
+│       		│
 │      			├── config/
 │       		│   	├── qa.properties
 │       		│   	├── stage.properties
 │       		│   	└── prod.properties
 │       		│
-│       		└── schemas.reqres/
-│       	   			├──  create-users-response.json
-│       	   			└── get-users-response.json
+│      			├── payloads(empty)
+│       		│
+│       		└── schemas/
+│                       │
+│           			├── petstore/
+│           			│		├── create-pet-response.json
+│    					│		├── error-response.json
+│    					│		├── find-by-status-response.json
+│    					│		└── get-pet-response.json
+│    					│
+│              		    ├── reqres/
+│                   	│   	├── create-users-response.json
+│       	   		    │       └── get-users-response.json
+│                       │
+│              		    └── sample-image.jpg
 │
+├── target
+├── .gitignore
+├── restassured-enterprise-framework.iml
 ├── FolderStructure
-├── pom.xml
-└── testng.xml
+├── testng.xml
+└── pom.xml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

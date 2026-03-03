@@ -1,22 +1,21 @@
 package tests.reqres;
 
 import framework.client.ReqresClient;
-import framework.core.schema.JsonSchemaValidator;
 import framework.core.validation.ResponseValidator;
 import framework.data.reqres.ReqresDataFactory;
-import framework.models.reqres.CreateUserRequest;
-import framework.models.reqres.CreateUserResponse;
+import framework.domain.reqres.CreateUserRequest;
+import framework.domain.reqres.CreateUserResponse;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tests.base.BaseTest;
 import tests.reqres.stubs.CreateUserStub;
 
-public class CreateUserTest extends BaseTest {
+public class CreateUserTest extends ReqresBaseTest {
 
     private final ReqresClient reqresClient = new ReqresClient();
 
-    @Test(groups = {"smoke", "regression"})
+    @Test(groups = {"reqres", "smoke", "regression"})
     public void shouldCreateUserSuccessfully() {
 
         // Arrange

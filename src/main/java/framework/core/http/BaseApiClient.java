@@ -1,11 +1,21 @@
 package framework.core.http;
 
+import framework.constants.ServiceType;
+import framework.core.chaos.ChaosInjector;
+import framework.core.metrics.MetricsCollector;
+import framework.core.observability.CorrelationManager;
 import framework.core.reporting.AllureRestAssuredFilter;
+import framework.core.resilience.CircuitBreaker;
+import framework.core.resilience.CircuitBreakerRegistry;
 import framework.core.retry.RetryExecutor;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 
@@ -13,89 +23,123 @@ public abstract class BaseApiClient {
 
     private static final Logger log = LogManager.getLogger(BaseApiClient.class);
 
+    private final ServiceType serviceType;
+
+    protected BaseApiClient(ServiceType serviceType) {
+        this.serviceType = serviceType;
+    }
+
     protected Response get(String path) {
-        return execute(HttpMethod.GET, path, null);
+        return execute(HttpMethod.GET, path, null, null, null, null);
     }
 
     protected Response delete(String path) {
-        return execute(HttpMethod.DELETE, path, null);
+        return execute(HttpMethod.DELETE, path, null, null, null, null);
     }
 
     protected Response post(String path, Object body) {
-        return execute(HttpMethod.POST, path, body);
+        return execute(HttpMethod.POST, path, body, null, null, null);
     }
 
     protected Response put(String path, Object body) {
-        return execute(HttpMethod.PUT, path, body);
+        return execute(HttpMethod.PUT, path, body, null, null, null);
     }
 
     protected Response patch(String path, Object body) {
-        return execute(HttpMethod.PATCH, path, body);
+        return execute(HttpMethod.PATCH, path, body, null, null, null);
     }
 
-    /**
-     * Single enterprise execution pipeline.
-     */
-    private Response execute(HttpMethod method, String path, Object body) {
+    protected Response execute(HttpMethod method, String path, Object body, Map<String, ?> pathParams, Map<String, ?> queryParams, File multipartFile) {
 
-        RequestSpecification spec = RequestSpecFactory.get();
+        RequestSpecification spec = RequestSpecFactory.get(serviceType);
 
-        if (body != null) {
+        if (pathParams != null && !pathParams.isEmpty()) {
+            spec.pathParams(pathParams);
+        }
+
+        if (queryParams != null && !queryParams.isEmpty()) {
+            spec.queryParams(queryParams);
+        }
+
+        if (multipartFile != null) {
+            spec.multiPart(multipartFile);
+        } else if (body != null) {
+            spec.contentType(ContentType.JSON);
             spec.body(body);
         }
 
         long start = System.currentTimeMillis();
 
-        Response response = RetryExecutor.executeWithRetry(() ->
-                sendRequestWithAllure(spec, method, path)
-        );
+        log.info("Correlation-ID: {}", CorrelationManager.getId());
+
+        // Circuit Breaker lookup
+        CircuitBreaker breaker = CircuitBreakerRegistry.get(serviceType);
+
+        if (!breaker.allowRequest()) {
+            throw new IllegalStateException("Circuit breaker OPEN for service: " + serviceType);
+        }
+
+//        Response response = RetryExecutor.executeWithRetry(method, () -> sendRequest(spec, method, path));
+
+        Response response = RetryExecutor.executeWithRetry(method, () -> {
+                            // Chaos injection BEFORE request
+                            ChaosInjector.inject(serviceType);
+                            return sendRequest(spec, method, path);
+                        });
+
+        // Record breaker outcome
+        if (response.statusCode() >= 500) {
+            breaker.recordFailure();
+        } else {
+            breaker.recordSuccess();
+        }
 
         long duration = System.currentTimeMillis() - start;
 
-        log.info("HTTP {} {} → {} ({} ms)",
-                method, path, response.statusCode(), duration);
+        MetricsCollector.record(serviceType, duration);
+
+        log.info("HTTP {} {} → {} ({} ms)", method, path, response.statusCode(), duration);
 
         return response;
     }
 
-    /**
-     * All requests MUST pass through this method.
-     * Ensures:
-     *  - Allure capture
-     *  - Centralized sending logic
-     */
-    private Response sendRequestWithAllure(RequestSpecification spec, HttpMethod method, String path) {
+    private Response sendRequest(RequestSpecification spec, HttpMethod method, String path) {
 
         return switch (method) {
-            case GET -> given()
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when()
-                    .get(path);
 
-            case POST -> given()
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when()
-                    .post(path);
+            case GET ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().get(path);
 
-            case PUT -> given()
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when()
-                    .put(path);
+            case POST ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().post(path);
 
-            case DELETE -> given()
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when()
-                    .delete(path);
+            case PUT ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().put(path);
 
-            case PATCH -> given()
-                    .filter(AllureRestAssuredFilter.get())
-                    .spec(spec)
-                    .when()
-                    .patch(path);
+            case DELETE ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().delete(path);
+
+            case PATCH ->
+                    given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().patch(path);
         };
+    }
+
+    protected Response getAbsolute(String absoluteUrl) {
+
+        RequestSpecification spec = RequestSpecFactory.get(serviceType);
+
+        long start = System.currentTimeMillis();
+
+        log.info("Correlation-ID: {}", CorrelationManager.getId());
+
+        Response response = RetryExecutor.executeWithRetry(HttpMethod.GET, () -> given().filter(new SensitiveHeaderFilter()).filter(AllureRestAssuredFilter.get()).spec(spec).when().get(absoluteUrl));
+
+        long duration = System.currentTimeMillis() - start;
+
+        MetricsCollector.record(serviceType, duration);
+
+        log.info("HTTP GET {} → {} ({} ms)", absoluteUrl, response.statusCode(), duration);
+
+        return response;
     }
 }

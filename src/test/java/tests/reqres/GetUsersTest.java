@@ -1,20 +1,19 @@
 package tests.reqres;
 
 import framework.client.ReqresClient;
-import framework.core.schema.JsonSchemaValidator;
 import framework.core.validation.ResponseValidator;
-import framework.models.reqres.GetUsersResponse;
+import framework.domain.reqres.GetUsersResponse;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tests.base.BaseTest;
 import tests.reqres.stubs.GetUsersStub;
 
-public class GetUsersTest extends BaseTest {
+public class GetUsersTest extends ReqresBaseTest {
 
     private final ReqresClient client = new ReqresClient();
 
-    @Test(groups = {"smoke", "regression"})
+    @Test(groups = {"reqres", "smoke", "regression"})
     public void shouldFetchUsersList() {
 
         GetUsersStub.stubUsersPage2();

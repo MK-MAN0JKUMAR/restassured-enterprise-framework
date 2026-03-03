@@ -409,6 +409,6 @@ and engineering test systems.
 
 Manoj Kumar
 SDET | Automation Engineer
-Java | Selenium | TestNG | CI/CD
+Java | Selenium | TestNG | Rest-Assured | CI/CD
 
 ---

@@ -12,10 +12,9 @@ public final class CreateUserStub {
 
         WireMockManager.getServer().stubFor(
                 post(urlEqualTo("/users"))
-                        // match VALID payload structure
                         .withRequestBody(matchingJsonPath("$.name"))
                         .withRequestBody(matchingJsonPath("$.job"))
-                        .atPriority(5) // lower priority than error
+                        .atPriority(1)
                         .willReturn(
                                 aResponse()
                                         .withStatus(201)

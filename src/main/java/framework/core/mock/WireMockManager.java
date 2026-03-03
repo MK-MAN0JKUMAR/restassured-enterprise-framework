@@ -1,43 +1,66 @@
 package framework.core.mock;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import lombok.Getter;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 public final class WireMockManager {
 
-    private static WireMockServer server;
+    private static WireMockServer SERVER;
+
+    private static final AtomicInteger ACTIVE_USERS = new AtomicInteger(0);
 
     private WireMockManager() {}
 
     public static synchronized void start() {
-        if (server != null && server.isRunning()) {
-            return; // already started
+
+        ACTIVE_USERS.incrementAndGet();
+
+        if (SERVER != null && SERVER.isRunning()) {
+            return;
         }
 
-        server = new WireMockServer(options().dynamicPort());
-        server.start();
+        SERVER = new WireMockServer(options().dynamicPort());
+        SERVER.start();
 
-        System.out.println("WireMock started on port: " + server.port());
+        System.out.println("WireMock started on port: " + SERVER.port());
     }
 
     public static synchronized void stop() {
-        if (server != null && server.isRunning()) {
-            server.stop();
-            System.out.println("WireMock stopped");
+
+        int remaining = ACTIVE_USERS.decrementAndGet();
+
+        if (remaining > 0) {
+            return;
         }
+
+        if (SERVER != null && SERVER.isRunning()) {
+            int port = SERVER.port();
+            SERVER.stop();
+            System.out.println("WireMock stopped on port: " + port);
+        }
+
+        SERVER = null;
+    }
+
+    public static boolean isRunning() {
+        return SERVER != null && SERVER.isRunning();
     }
 
     public static WireMockServer getServer() {
-        if (server == null || !server.isRunning()) {
-            throw new IllegalStateException("WireMock not started");
+
+        if (!isRunning()) {
+            throw new IllegalStateException(
+                    "WireMock server not started. Did you forget @BeforeClass?"
+            );
         }
-        return server;
+
+        return SERVER;
     }
 
-    public static int port() {
-        return getServer().port();
+    public static String baseUrl() {
+        return "http://localhost:" + getServer().port();
     }
 }
-

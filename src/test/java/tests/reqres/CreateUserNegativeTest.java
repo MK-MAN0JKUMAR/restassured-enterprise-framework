@@ -1,20 +1,19 @@
 package tests.reqres;
 
 import framework.client.ReqresClient;
-import framework.core.http.ResponseSpecFactory;
 import framework.core.validation.ResponseValidator;
-import framework.models.common.ErrorResponse;
+import framework.domain.common.ErrorResponse;
 import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import tests.base.BaseTest;
 import tests.reqres.stubs.ErrorStubs;
 
-public class CreateUserNegativeTest extends BaseTest {
+public class CreateUserNegativeTest extends ReqresBaseTest {
 
     private final ReqresClient client = new ReqresClient();
 
-    @Test(groups = {"negative", "regression"})
+    @Test(groups = {"reqres", "negative", "regression"})
     public void shouldReturn400ForInvalidPayload() {
 
         ErrorStubs.stubCreateUserBadRequest();
