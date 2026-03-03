@@ -1,6 +1,6 @@
 package framework.data.reqres;
 
-import framework.models.reqres.CreateUserRequest;
+import framework.domain.reqres.CreateUserRequest;
 
 import java.util.UUID;
 

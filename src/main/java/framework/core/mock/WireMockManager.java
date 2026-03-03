@@ -1,43 +1,58 @@
 package framework.core.mock;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import lombok.Getter;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 public final class WireMockManager {
 
-    private static WireMockServer server;
+    private static final ThreadLocal<WireMockServer> SERVER = new ThreadLocal<>();
 
     private WireMockManager() {}
 
-    public static synchronized void start() {
-        if (server != null && server.isRunning()) {
-            return; // already started
+    public static void start() {
+
+        if (SERVER.get() != null && SERVER.get().isRunning()) {
+            return;
         }
 
-        server = new WireMockServer(options().dynamicPort());
+        WireMockServer server = new WireMockServer(options().dynamicPort());
         server.start();
 
-        System.out.println("WireMock started on port: " + server.port());
+        SERVER.set(server);
+
+        System.out.println("WireMock started on port: " + server.port()
+                + " | Thread: " + Thread.currentThread().getId());
     }
 
-    public static synchronized void stop() {
-        if (server != null && server.isRunning()) {
-            server.stop();
-            System.out.println("WireMock stopped");
+    public static void stop() {
+        WireMockServer server = SERVER.get();
+
+        if (server != null) {
+            int port = server.port();
+
+            if (server.isRunning()) {
+                server.stop();
+            }
+
+            System.out.println("WireMock stopped on port: "
+                    + port + " | Thread: " + Thread.currentThread().getId());
         }
+        SERVER.remove();
     }
 
     public static WireMockServer getServer() {
+
+        WireMockServer server = SERVER.get();
+
         if (server == null || !server.isRunning()) {
-            throw new IllegalStateException("WireMock not started");
+            throw new IllegalStateException("WireMock not started for this thread");
         }
+
         return server;
     }
 
-    public static int port() {
-        return getServer().port();
+    public static String baseUrl() {
+        return "http://localhost:" + getServer().port();
     }
 }
-

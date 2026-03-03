@@ -1,4 +1,4 @@
-package framework.models.reqres;
+package framework.domain.reqres;
 
 import lombok.Getter;
 import java.util.List;

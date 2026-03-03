@@ -12,9 +12,7 @@ public final class ErrorStubs {
 
         WireMockManager.getServer().stubFor(
                 post(urlEqualTo("/users"))
-                        // match INVALID payload (empty or missing fields)
-                        .withRequestBody(equalToJson("{}"))
-                        .atPriority(1) // highest priority
+                        .atPriority(1)   // highest priority
                         .willReturn(
                                 aResponse()
                                         .withStatus(400)

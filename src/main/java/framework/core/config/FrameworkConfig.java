@@ -81,9 +81,7 @@ public final class FrameworkConfig {
         String baseUrl;
 
         if (mockMode) {
-            // WireMock MUST already be started in BaseTest @BeforeSuite
-            int port = WireMockManager.port();
-            baseUrl = "http://localhost:" + port;
+            baseUrl = null; // will be resolved per thread dynamically
         } else {
             baseUrl = System.getProperty("base.url", require(props, "base.url"));
         }
