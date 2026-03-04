@@ -1,6 +1,7 @@
 package tests.petstore;
 
 import framework.client.PetstoreClient;
+import framework.core.annotation.Service;
 import framework.core.validation.ResponseValidator;
 import framework.data.petstore.PetstoreDataFactory;
 import framework.domain.petstore.PetRequest;
@@ -9,7 +10,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import tests.base.BaseTest;
 
-@Test(groups = {"petstore", "negative"})
+@Service("petstore")
+@Test(groups = {"negative", "regression"})
 public class CreatePetNegativeTest extends BaseTest {
 
     private final PetstoreClient client = new PetstoreClient();

@@ -1,6 +1,7 @@
 package tests.reqres;
 
 import framework.client.ReqresClient;
+import framework.core.annotation.Service;
 import framework.core.validation.ResponseValidator;
 import framework.domain.reqres.GetUsersResponse;
 import io.restassured.response.Response;
@@ -13,7 +14,8 @@ public class GetUsersTest extends ReqresBaseTest {
 
     private final ReqresClient client = new ReqresClient();
 
-    @Test(groups = {"reqres", "smoke", "regression"})
+    @Service("reqres")
+    @Test(groups = {"smoke", "regression"})
     public void shouldFetchUsersList() {
 
         GetUsersStub.stubUsersPage2();

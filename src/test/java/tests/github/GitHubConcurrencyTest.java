@@ -1,6 +1,7 @@
 package tests.github;
 
 import framework.client.GitHubClient;
+import framework.core.annotation.Service;
 import framework.data.github.GitHubDataFactory;
 import framework.domain.github.CreateRepoRequest;
 import framework.domain.github.RepoResponse;
@@ -18,7 +19,8 @@ public class GitHubConcurrencyTest extends BaseTest {
     private final GitHubClient client = new GitHubClient();
     private final String owner = System.getenv("GITHUB_USERNAME");
 
-    @Test(groups = {"github", "concurrency"})
+    @Service("github")
+    @Test(groups = {"regression"})
     public void shouldHandleParallelRepoCreation() throws Exception {
 
         Assert.assertNotNull(owner, "GITHUB_USERNAME must be set");

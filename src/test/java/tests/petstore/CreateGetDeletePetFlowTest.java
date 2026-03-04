@@ -1,6 +1,7 @@
 package tests.petstore;
 
 import framework.client.PetstoreClient;
+import framework.core.annotation.Service;
 import framework.core.validation.ResponseValidator;
 import framework.data.petstore.PetstoreDataFactory;
 import framework.domain.petstore.PetRequest;
@@ -13,7 +14,8 @@ public class CreateGetDeletePetFlowTest extends BaseTest {
 
     private final PetstoreClient client = new PetstoreClient();
 
-    @Test(groups = {"petstore", "regression"})
+    @Service("petstore")
+    @Test(groups = {"regression"})
     public void shouldCompletePetLifecycle() {
 
         // =========================

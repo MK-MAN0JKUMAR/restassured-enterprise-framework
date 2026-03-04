@@ -1,6 +1,7 @@
 package tests.reqres;
 
 import framework.client.ReqresClient;
+import framework.core.annotation.Service;
 import framework.core.validation.ResponseValidator;
 import framework.data.reqres.ReqresDataFactory;
 import framework.domain.reqres.CreateUserRequest;
@@ -15,7 +16,8 @@ public class CreateUserTest extends ReqresBaseTest {
 
     private final ReqresClient reqresClient = new ReqresClient();
 
-    @Test(groups = {"reqres", "smoke", "regression"})
+    @Service("reqres")
+    @Test(groups = {"smoke", "regression"})
     public void shouldCreateUserSuccessfully() {
 
         // Arrange
