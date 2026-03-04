@@ -21,15 +21,17 @@ pipeline {
                 description: 'Test group'
         )
 
-        choice(
+        string(
                 name: 'SERVICES',
-                choices: ['reqres','petstore','github','all'],
-                description: 'Service to test'
+                defaultValue: 'all',
+                description: 'Services to run (reqres,petstore,github or all)'
         )
     }
 
     environment {
+
         MAVEN_OPTS = "-Xmx1024m"
+
         GITHUB_TOKEN = credentials('github-token')
         GITHUB_USERNAME = credentials('github-username')
     }
@@ -51,49 +53,58 @@ pipeline {
         }
 
         stage('Execute API Tests') {
+
             steps {
 
                 script {
 
                     def envName = params.TEST_ENV
                     def group = params.GROUPS
-                    def service = params.SERVICES
+                    def serviceParam = params.SERVICES
 
-                    def groupFilter = ""
-
-                    if(group == "all" && service == "all") {
-
-                        bat "mvn clean test -Denv=${envName}"
-
+                    def groupArg = ""
+                    if(group != "all"){
+                        groupArg = "-Dgroups=${group}"
                     }
 
-                    else if(group == "all") {
+                    if(serviceParam == "all"){
 
-                        groupFilter = service
+                        def services = ["reqres","petstore","github"]
 
-                        bat "mvn clean test -Denv=${envName} -Dgroups=${groupFilter}"
+                        def branches = [:]
 
+                        for(s in services){
+
+                            branches[s] = {
+
+                                bat """
+                        mvn clean test ^
+                        -Denv=${envName} ^
+                        ${groupArg} ^
+                        -Dservice=${s}
+                        """
+
+                            }
+                        }
+
+                        parallel branches
                     }
 
-                    else if(service == "all") {
+                    else{
 
-                        groupFilter = group
-
-                        bat "mvn clean test -Denv=${envName} -Dgroups=${groupFilter}"
-
-                    }
-
-                    else {
-
-                        groupFilter = "${group},${service}"
-
-                        bat "mvn clean test -Denv=${envName} -Dgroups=${groupFilter}"
+                        bat """
+                mvn clean test ^
+                -Denv=${envName} ^
+                ${groupArg} ^
+                "-Dservice=${serviceParam}"
+                """
 
                     }
 
                 }
 
             }
+
         }
 
         stage('Generate Allure Report') {
@@ -101,6 +112,7 @@ pipeline {
                 bat 'mvn allure:report || exit 0'
             }
         }
+
     }
 
     post {
@@ -114,11 +126,13 @@ pipeline {
         }
 
         success {
-            echo 'Tests completed successfully'
+            echo "Tests completed successfully"
         }
 
         failure {
-            echo 'Tests failed'
+            echo "Tests failed"
         }
+
     }
+
 }

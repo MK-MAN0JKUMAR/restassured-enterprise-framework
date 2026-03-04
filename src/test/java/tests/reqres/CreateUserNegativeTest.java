@@ -1,6 +1,7 @@
 package tests.reqres;
 
 import framework.client.ReqresClient;
+import framework.core.annotation.Service;
 import framework.core.validation.ResponseValidator;
 import framework.domain.common.ErrorResponse;
 import io.restassured.response.Response;
@@ -13,7 +14,8 @@ public class CreateUserNegativeTest extends ReqresBaseTest {
 
     private final ReqresClient client = new ReqresClient();
 
-    @Test(groups = {"reqres", "negative", "regression"})
+    @Service("reqres")
+    @Test(groups = {"negative", "regression"})
     public void shouldReturn400ForInvalidPayload() {
 
         ErrorStubs.stubCreateUserBadRequest();

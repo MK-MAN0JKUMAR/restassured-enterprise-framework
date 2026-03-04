@@ -1,5 +1,6 @@
 package tests.base;
 
+import framework.core.listener.ServiceExecutionListener;
 import framework.core.metrics.MetricsCollector;
 import framework.core.observability.CorrelationManager;
 import framework.data.DataSeedManager;
@@ -11,7 +12,10 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Listeners;
 
-@Listeners({AllureTestNg.class})
+@Listeners({
+        AllureTestNg.class,
+        ServiceExecutionListener.class
+})
 public abstract class BaseTest {
 
     private static final Logger log = LogManager.getLogger(BaseTest.class);
