@@ -10,16 +10,16 @@ pipeline {
     parameters {
 
         choice(name: 'TEST_ENV',
-                choices: ['qa', 'stage', 'prod'],
-                description: 'Environment to run tests')
+                choices: ['qa','stage','prod'],
+                description: 'Environment')
 
         choice(name: 'GROUPS',
-                choices: ['smoke', 'regression', 'all'],
+                choices: ['smoke','regression','all'],
                 description: 'Test group')
 
         string(name: 'SERVICES',
                 defaultValue: 'all',
-                description: 'Services to run (reqres,petstore,github or all)')
+                description: 'Services (reqres,petstore,github or all)')
     }
 
     environment {
@@ -57,41 +57,45 @@ pipeline {
                     def serviceParam = params.SERVICES
 
                     def groupArg = ""
-                    if (group != "all") {
+                    if(group != "all"){
                         groupArg = "-Dgroups=${group}"
                     }
 
-                    if (serviceParam == "all") {
+                    def services = []
 
-                        def services = ["reqres", "petstore", "github"]
+                    if(serviceParam == "all"){
+                        services = ["reqres","petstore","github"]
+                    } else {
+                        services = serviceParam.split(",")
+                    }
 
-                        def branches = [:]
+                    echo "Services to run: ${services}"
 
-                        for (s in services) {
+                    def branches = [:]
 
-                            branches[s] = {
+                    for(service in services){
+
+                        def svc = service.trim()   // FIX closure bug
+
+                        branches[svc] = {
+
+                            dir("${env.WORKSPACE}@${svc}") {  // FIX workspace conflict
+
+                                checkout scm
 
                                 bat """
-                        mvn clean test ^
-                        -Denv=${envName} ^
-                        ${groupArg} ^
-                        -Dservice=${s}
-                        """
+                            mvn clean test ^
+                            -Denv=${envName} ^
+                            ${groupArg} ^
+                            -Dservice=${svc}
+                            """
 
                             }
+
                         }
-
-                        parallel branches
-                    } else {
-
-                        bat """
-                mvn clean test ^
-                -Denv=${envName} ^
-                ${groupArg} ^
-                "-Dservice=${serviceParam}"
-                """
-
                     }
+
+                    parallel branches
 
                 }
 
@@ -126,5 +130,4 @@ pipeline {
         }
 
     }
-
 }
