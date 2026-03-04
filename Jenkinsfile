@@ -1,70 +1,134 @@
-stage('Execute API Tests') {
+pipeline {
 
-    steps {
+    agent any
 
-        script {
+    options {
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
 
-            def envName = params.TEST_ENV
-            def group = params.GROUPS
-            def service = params.SERVICES
+    parameters {
 
-            echo "Environment: ${envName}"
-            echo "Groups: ${group}"
-            echo "Service: ${service}"
+        choice(
+            name: 'TEST_ENV',
+            choices: ['qa','stage','prod'],
+            description: 'Environment to run tests'
+        )
 
-            def groupFilter = ""
+        choice(
+            name: 'GROUPS',
+            choices: ['smoke','regression','all'],
+            description: 'Test group'
+        )
 
-            // ----------------------------
-            // GROUP + SERVICE FILTER LOGIC
-            // ----------------------------
+        choice(
+            name: 'SERVICES',
+            choices: ['reqres','petstore','github','all'],
+            description: 'Service to test'
+        )
+    }
 
-            if(group == "all" && service == "all") {
+    tools {
+        jdk 'jdk17'
+        maven 'maven3'
+    }
 
-                // Run everything
-                sh """
-                mvn clean test \
-                -Denv=${envName}
-                """
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/MK-MANOJKUMAR/restassured-enterprise-framework.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile -DskipTests'
+            }
+        }
+
+        stage('Execute API Tests') {
+
+            steps {
+
+                script {
+
+                    def envName = params.TEST_ENV
+                    def group = params.GROUPS
+                    def service = params.SERVICES
+
+                    def groupFilter = ""
+
+                    if(group == "all" && service == "all") {
+
+                        sh """
+                        mvn clean test \
+                        -Denv=${envName}
+                        """
+
+                    }
+                    else if(group == "all") {
+
+                        groupFilter = service
+
+                        sh """
+                        mvn clean test \
+                        -Denv=${envName} \
+                        -Dgroups=${groupFilter}
+                        """
+
+                    }
+                    else if(service == "all") {
+
+                        groupFilter = group
+
+                        sh """
+                        mvn clean test \
+                        -Denv=${envName} \
+                        -Dgroups=${groupFilter}
+                        """
+
+                    }
+                    else {
+
+                        groupFilter = "${group},${service}"
+
+                        sh """
+                        mvn clean test \
+                        -Denv=${envName} \
+                        -Dgroups=${groupFilter}
+                        """
+
+                    }
+
+                }
 
             }
-            else if(group == "all") {
+        }
 
-                // Run all tests for a specific service
-                groupFilter = service
-
-                sh """
-                mvn clean test \
-                -Denv=${envName} \
-                -Dgroups=${groupFilter}
-                """
-
+        stage('Generate Allure Report') {
+            steps {
+                sh 'mvn allure:report'
             }
-            else if(service == "all") {
+        }
+    }
 
-                // Run group across all services
-                groupFilter = group
+    post {
 
-                sh """
-                mvn clean test \
-                -Denv=${envName} \
-                -Dgroups=${groupFilter}
-                """
+        always {
 
-            }
-            else {
+            archiveArtifacts artifacts: 'target/surefire-reports/**/*', allowEmptyArchive: true
 
-                // Run group within specific service
-                groupFilter = "${group},${service}"
-
-                sh """
-                mvn clean test \
-                -Denv=${envName} \
-                -Dgroups=${groupFilter}
-                """
-
-            }
+            archiveArtifacts artifacts: 'target/site/allure-maven-plugin/**/*', allowEmptyArchive: true
 
         }
 
+        success {
+            echo 'Tests completed successfully'
+        }
+
+        failure {
+            echo 'Tests failed'
+        }
     }
 }
