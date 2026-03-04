@@ -9,23 +9,17 @@ pipeline {
 
     parameters {
 
-        choice(
-                name: 'TEST_ENV',
-                choices: ['qa','stage','prod'],
-                description: 'Environment to run tests'
-        )
+        choice(name: 'TEST_ENV',
+                choices: ['qa', 'stage', 'prod'],
+                description: 'Environment to run tests')
 
-        choice(
-                name: 'GROUPS',
-                choices: ['smoke','regression','all'],
-                description: 'Test group'
-        )
+        choice(name: 'GROUPS',
+                choices: ['smoke', 'regression', 'all'],
+                description: 'Test group')
 
-        string(
-                name: 'SERVICES',
+        string(name: 'SERVICES',
                 defaultValue: 'all',
-                description: 'Services to run (reqres,petstore,github or all)'
-        )
+                description: 'Services to run (reqres,petstore,github or all)')
     }
 
     environment {
@@ -63,17 +57,17 @@ pipeline {
                     def serviceParam = params.SERVICES
 
                     def groupArg = ""
-                    if(group != "all"){
+                    if (group != "all") {
                         groupArg = "-Dgroups=${group}"
                     }
 
-                    if(serviceParam == "all"){
+                    if (serviceParam == "all") {
 
-                        def services = ["reqres","petstore","github"]
+                        def services = ["reqres", "petstore", "github"]
 
                         def branches = [:]
 
-                        for(s in services){
+                        for (s in services) {
 
                             branches[s] = {
 
@@ -88,9 +82,7 @@ pipeline {
                         }
 
                         parallel branches
-                    }
-
-                    else{
+                    } else {
 
                         bat """
                 mvn clean test ^
