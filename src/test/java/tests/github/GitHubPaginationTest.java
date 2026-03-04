@@ -1,6 +1,7 @@
 package tests.github;
 
 import framework.client.GitHubClient;
+import framework.core.annotation.Service;
 import framework.core.pagination.PaginationHelper;
 import framework.domain.github.RepoResponse;
 import io.restassured.response.Response;
@@ -14,7 +15,8 @@ public class GitHubPaginationTest extends BaseTest {
 
     private final GitHubClient gitHubClient = new GitHubClient();
 
-    @Test(groups = {"github", "pagination"})
+    @Service("github")
+    @Test(groups = {"regression"})
     public void shouldCollectAllRepositoriesAcrossPages() {
 
         Response firstPage = gitHubClient.listRepos(5);

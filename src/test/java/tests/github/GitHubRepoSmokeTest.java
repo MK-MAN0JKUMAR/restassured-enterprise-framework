@@ -1,6 +1,7 @@
 package tests.github;
 
 import framework.client.GitHubClient;
+import framework.core.annotation.Service;
 import framework.data.github.GitHubDataFactory;
 import framework.domain.github.CreateRepoRequest;
 import framework.domain.github.RepoResponse;
@@ -17,7 +18,8 @@ public class GitHubRepoSmokeTest extends BaseTest {
 
     private final String owner = System.getenv("GITHUB_USERNAME");
 
-    @Test(groups = {"github", "smoke"})
+    @Service("github")
+    @Test(groups = {"smoke", "regression"})
     public void shouldCreateAndDeleteRepository() {
 
         Assert.assertNotNull(owner,

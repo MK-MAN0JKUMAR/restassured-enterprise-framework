@@ -1,6 +1,7 @@
 package tests.github;
 
 import framework.client.GitHubClient;
+import framework.core.annotation.Service;
 import framework.data.github.GitHubDataFactory;
 import framework.domain.github.CreateRepoRequest;
 import io.restassured.response.Response;
@@ -16,7 +17,8 @@ public class GitHubDuplicateRepoNegativeTest extends BaseTest {
 
     private final String owner = System.getenv("GITHUB_USERNAME");
 
-    @Test(groups = {"github", "negative", "github-negative"})
+    @Service("github")
+    @Test(groups = {"negative", "regression"})
     public void shouldReturn422WhenRepositoryAlreadyExists() {
 
         Assert.assertNotNull(owner,

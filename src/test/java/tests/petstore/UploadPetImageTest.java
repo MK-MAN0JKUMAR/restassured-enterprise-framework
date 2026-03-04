@@ -1,6 +1,7 @@
 package tests.petstore;
 
 import framework.client.PetstoreClient;
+import framework.core.annotation.Service;
 import framework.core.validation.ResponseValidator;
 import framework.data.petstore.PetstoreDataFactory;
 import framework.domain.petstore.PetRequest;
@@ -10,7 +11,8 @@ import tests.base.BaseTest;
 
 import java.io.File;
 
-@Test(groups = {"petstore", "regression"})
+@Service("petstore")
+@Test(groups = {"regression"})
 public class UploadPetImageTest extends BaseTest {
 
     private final PetstoreClient client = new PetstoreClient();

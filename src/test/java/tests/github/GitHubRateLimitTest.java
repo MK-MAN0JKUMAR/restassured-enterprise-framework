@@ -1,6 +1,7 @@
 package tests.github;
 
 import framework.client.GitHubClient;
+import framework.core.annotation.Service;
 import framework.core.validation.RateLimitValidator;
 import io.restassured.response.Response;
 import org.testng.Assert;
@@ -11,7 +12,8 @@ public class GitHubRateLimitTest extends BaseTest {
 
     private final GitHubClient gitHubClient = new GitHubClient();
 
-    @Test(groups = {"github", "resilience"})
+    @Service("github")
+    @Test(groups = {"regression", "resilience"})
     public void shouldExposeValidRateLimitHeaders() {
 
         Response response = gitHubClient.getRepo(

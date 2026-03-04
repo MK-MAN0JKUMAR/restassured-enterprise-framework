@@ -1,6 +1,7 @@
 package tests.github;
 
 import framework.constants.ServiceType;
+import framework.core.annotation.Service;
 import framework.core.http.RequestSpecFactory;
 import io.restassured.response.Response;
 import org.testng.Assert;
@@ -11,7 +12,8 @@ import static io.restassured.RestAssured.given;
 
 public class GitHubAuthNegativeTest extends BaseTest {
 
-    @Test(groups = {"github", "negative", "github-negative"})
+    @Service("github")
+    @Test(groups = {"negative", "regression"})
     public void shouldReturn401ForInvalidToken() {
 
         Response response = given()
