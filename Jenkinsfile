@@ -10,45 +10,45 @@ pipeline {
     parameters {
 
         choice(
-            name: 'TEST_ENV',
-            choices: ['qa','stage','prod'],
-            description: 'Environment to run tests'
+                name: 'TEST_ENV',
+                choices: ['qa','stage','prod'],
+                description: 'Environment to run tests'
         )
 
         choice(
-            name: 'GROUPS',
-            choices: ['smoke','regression','all'],
-            description: 'Test group'
+                name: 'GROUPS',
+                choices: ['smoke','regression','all'],
+                description: 'Test group'
         )
 
         choice(
-            name: 'SERVICES',
-            choices: ['reqres','petstore','github','all'],
-            description: 'Service to test'
+                name: 'SERVICES',
+                choices: ['reqres','petstore','github','all'],
+                description: 'Service to test'
         )
     }
 
-    tools {
-        jdk 'jdk17'
-        maven 'maven3'
+    environment {
+        MAVEN_OPTS = "-Xmx1024m"
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/MK-MANOJKUMAR/restassured-enterprise-framework.git'
+                git branch: 'main',
+                        url: 'https://github.com/MK-MAN0JKUMAR/restassured-enterprise-framework.git'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean compile -DskipTests'
+                bat 'mvn -version'
+                bat 'mvn clean compile -DskipTests'
             }
         }
 
         stage('Execute API Tests') {
-
             steps {
 
                 script {
@@ -61,43 +61,31 @@ pipeline {
 
                     if(group == "all" && service == "all") {
 
-                        sh """
-                        mvn clean test \
-                        -Denv=${envName}
-                        """
+                        bat "mvn clean test -Denv=${envName}"
 
                     }
+
                     else if(group == "all") {
 
                         groupFilter = service
 
-                        sh """
-                        mvn clean test \
-                        -Denv=${envName} \
-                        -Dgroups=${groupFilter}
-                        """
+                        bat "mvn clean test -Denv=${envName} -Dgroups=${groupFilter}"
 
                     }
+
                     else if(service == "all") {
 
                         groupFilter = group
 
-                        sh """
-                        mvn clean test \
-                        -Denv=${envName} \
-                        -Dgroups=${groupFilter}
-                        """
+                        bat "mvn clean test -Denv=${envName} -Dgroups=${groupFilter}"
 
                     }
+
                     else {
 
                         groupFilter = "${group},${service}"
 
-                        sh """
-                        mvn clean test \
-                        -Denv=${envName} \
-                        -Dgroups=${groupFilter}
-                        """
+                        bat "mvn clean test -Denv=${envName} -Dgroups=${groupFilter}"
 
                     }
 
@@ -108,7 +96,7 @@ pipeline {
 
         stage('Generate Allure Report') {
             steps {
-                sh 'mvn allure:report'
+                bat 'mvn allure:report || exit 0'
             }
         }
     }
@@ -118,9 +106,9 @@ pipeline {
         always {
 
             archiveArtifacts artifacts: 'target/surefire-reports/**/*', allowEmptyArchive: true
-
             archiveArtifacts artifacts: 'target/site/allure-maven-plugin/**/*', allowEmptyArchive: true
 
+            echo "Build finished."
         }
 
         success {
