@@ -30,6 +30,8 @@ pipeline {
 
     environment {
         MAVEN_OPTS = "-Xmx1024m"
+        GITHUB_TOKEN = credentials('github-token')
+        GITHUB_USERNAME = credentials('github-username')
     }
 
     stages {
