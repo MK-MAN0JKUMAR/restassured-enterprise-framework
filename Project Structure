@@ -1,8 +1,8 @@
 restassured-enterprise-framework/
-├── .allure
 ├── .github
-├── .idea
-├── .mvn
+│       └── workflows
+│              └── api-tests.yml
+│
 ├── src/
 │   ├── main/
 │   │		│
@@ -11,51 +11,89 @@ restassured-enterprise-framework/
 │   │   			└── framework/
 │   │       				│
 │   │       				├── client/
+│   │       				│       ├── GitHubClient.java
 │   │       				│       ├── PetstoreClient.java
 │   │       				│		└── ReqresClient.java
 │   │       				│
 │   │       				├── constants/
 │   │       				│       ├── PetstoreEndpoints.java
-│   │       				│		└── ReqresEndpoints.java
+│   │       				│		├── ReqresEndpoints.java
+│   │       				│		└── ServiceType.enum
 │   │       				│
 │   │       				├── core/
-│   │       				│		├── config/
-│   │       				│		│		└── FrameworkConfig.java
-│   │       				│		├── exception/
-│   │       				│		│		├── ConfigException.java
-│   │       				│		│		└── FrameworkException.java
-│   │       				│		├── http/
+│   │       				│		│
+│   │       				│		├── annotation
+│   │       				│		│		└── Service
+│   │       				│		│
+│   │       				│		├── chaos
+│   │       				│		│		├── ChaosConfig.java
+│   │       				│		│		└── ChaosInjector.java
+│   │       				│		│
+│   │       				│		├── config
+│   │       				│		│		├── FrameworkConfig.java
+│   │       				│		│		├── ServiceConfig.java
+│   │       				│		│		└── ServiceConfigResolver.java
+│   │       				│		│
+│   │       				│		├── exception
+│   │       				│		│		├── ConfigException.enum
+│   │       				│		│		└── FrameworkException.enum
+│   │       				│		│
+│   │       				│		├── http
 │   │       				│		│		├── BaseApiClient.java
-│   │       				│		│		├── HttpMethod.java
+│   │       				│		│		├── HttpMethod.enum
 │   │       				│		│		├── RequestSpecFactory.java
-│   │       				│		│		└── ResponseSpecFactory.java
-│   │       				│		├── mock/
+│   │       				│		│		├── ResponseSpecFactory.java
+│   │       				│		│		└── SensitiveHeaderFilter.java
+│   │       				│		│
+│   │       				│		├── metrics
+│   │       				│		│		└── MetricsCollector.java
+│   │       				│		│
+│   │       				│		├── mock
 │   │       				│		│		└── WireMockManager.java
-│   │       				│		├── reporting/
+│   │       				│		│
+│   │       				│		├── observability
+│   │       				│		│		└── CorrelationManager.java
+│   │       				│		│
+│   │       				│		├── pagination
+│   │       				│		│		├──LinkHeaderParser.java
+│   │       				│		│		└── PaginationHelper.java
+│   │       				│		│
+│   │       				│		├── reporting
 │   │       				│		│		└── AllureRestAssuredFilter.java
-│   │       				│		├── retry/
-│   │       				│		│		└── RetryExecutor.java
-│   │       				│		├── schema/
+│   │       				│		│
+│   │       				│		├── resilience
+│   │       				│		│		├──CircuitBreaker.java
+│   │       				│		│		├──CircuitBreakerRegistry.java
+│   │       				│		│		└── CircuitState.enum
+│   │       				│		│
+│   │       				│		├── retry
+│   │       				│		│		├──RetryContext.java
+│   │       				│		│		├──RetryExecutor.java
+│   │       				│		│		└── RetryPolicy.java
+│   │       				│		│
+│   │       				│		├── schema
 │   │       				│		│		├── JsonSchemaValidator.java
 │   │       				│		│		└── SchemaLoader.java
-│   │       				│		└── validation/
+│   │       				│		│
+│   │       				│		└── validation
+│   │       				│				├──RateLimitValidator.java
 │   │       				│				└── ResponseValidator.java
 │   │       				│
 │   │       				├── data/
 │   │       				│		├── github/
-│   │                       │       │        ├──builders/
+│   │                       │       │        ├──builders
 │   │       				│		│        │         └── RepoBuilder.java
 │   │       				│		│        └── GitHubDataFactory.java
 │   │       				│		│
 │   │       				│		├── petstore/
-│   │                       │       │        ├──builders/
+│   │                       │       │        ├──builders
 │   │       				│		│        │         └── PetBuilder.java
 │   │       				│		│        └── PetstoreDataFactory.java
 │   │       				│		│
 │   │       				│		│
 │   │       				│		│
 │   │       				│		├── reqres/
-│   │                       │       │        ├──builders/
+│   │                       │       │        ├──builders
 │   │       				│		│        │         └── ReqresUserBuilder.java
 │   │       				│		│        └── ReqresDataFactory.java
 │   │       				│		│
@@ -88,14 +126,34 @@ restassured-enterprise-framework/
 │       │
 │       ├── java/
 │       │		│
+│       │		├── framework
+│       │    	│		│
+│       │       │	    ├── core
+│       │       │		│     ├── listener
+│       │       │		│     │        └── ServiceExecutionListener.java
+│       │       │		│     │
+│       │       │		│     └── service
+│       │       │		│	           └── ServiceRegistry.java
+│       │       │		│
+│       │       │		└── tools
+│       │       │			   └── ServiceDiscoveryRunner.java
+│       │       │
+│       │       │
 │       │		└── tests/
 │       │    			│
-│       │    			├── base/
+│       │    			├── base
 │       │    			│		└── BaseTest.java
 │       │    			│
-│       │    			├── github/ (project 3 start now)- now start working on this
-│       │    			│
-│       │    			├── petstore/ (project 2 done/completed)
+│       │    			├── github
+│       │    			│		│
+│       │    			│		├── GitHubAuthNegativeTest.java
+│    	│				│		├── GitHubConcurrencyTest.java
+│    	│				│		├── GitHubDuplicateRepoNegativeTest.java
+│    	│				│		├── GitHubPaginationTest.java
+│    	│				│		├── GitHubRateLimitTest.java
+│    	│				│		└── GitHubRepoSmokeTest.java
+│    	│				│
+│       │    			├── petstore
 │       │    			│		│
 │       │    			│		├── CreateGetDeletePetFlowTest.java
 │    	│				│		├── CreatePetNegativeTest.java
@@ -103,17 +161,19 @@ restassured-enterprise-framework/
 │    	│				│		├── FindPetByStatusTest.java
 │    	│				│		└── UploadPetImageTest.java
 │       │    			│
-│       │    			└── reqres/ (project 1 done/completed)
+│       │    			└── reqres
 │       │    					│
 │       │    					├── stubs/
 │       │    					│		├── CreateUserStub.java
 │       │    					│		├── ErrorStubs.java
-│       │    					│		└── GetUserStub.java
+│       │    					│		├── GetUserStub.java
+│       │    					│		└── RetrySimulationStub.java
 │       │    			 		│
 │    	│						├── CreateUserNegativeTest.java
 │    	│						├── CreateUserTest.java
 │    	│						├── GetUsersTest.java
-│    	│						└── ReqresBaseTest.java
+│    	│						├── ReqresBaseTest.java
+│    	│						└── RetryValidationTest.java
 │    	│
 │   	└── resources/
 │       		│
@@ -140,49 +200,9 @@ restassured-enterprise-framework/
 │                       │
 │              		    └── sample-image.jpg
 │
-├── target
+├── Jenkinsfile
 ├── .gitignore
-├── restassured-enterprise-framework.iml
-├── FolderStructure
+├── Project Structure
 ├── testng.xml
+├── README.md
 └── pom.xml
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-mvn clean test -Denv=qa -Dmock=true
-
-mvn clean test -Denv=qa -Dgroups=regression
-
-mvn clean test -Denv=qa -Dgroups=regression -DthreadCount=1
-
-
-for allure report
-run
-mvn allure:report
-target/site/allure-maven-plugin/index.html
-
-
-
-
-
-
