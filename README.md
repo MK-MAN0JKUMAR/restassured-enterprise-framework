@@ -216,162 +216,67 @@ This architecture supports future expansion into:
 ---
 
 # Project Structure
-
+For Reference: https://github.com/MK-MAN0JKUMAR/restassured-enterprise-framework/blob/main/Project%20Structure
 ```
 restassured-enterprise-framework/
-├── .github
-│       └── workflows
+├── .github/workflows
 │              └── api-tests.yml
-│
 ├── src/
-│   ├── main/
-│   │   └── java/
-│   │   	└── framework/
+│   ├── main/java/framework/
 │   │       		├── client/
-│   │       		│       ├── GitHubClient.java
-│   │       		│       ├── PetstoreClient.java
-│   │       		│	└── ReqresClient.java
-│   │       		│
 │   │       		├── constants/
-│   │       		│       ├── PetstoreEndpoints.java
-│   │       		│	├── ReqresEndpoints.java
-│   │       		│	└── ServiceType.enum
-│   │       		│
 │   │       		├── core/
-│   │       		│	├── annotation
-│   │       		│	│	└── Service
-│   │       		│	├── chaos
-│   │       		│	│	├── ChaosConfig.java
-│   │       		│	│	└── ChaosInjector.java
-│   │       		│	├── config
-│   │       		│	│	├── FrameworkConfig.java
-│   │       		│	│	├── ServiceConfig.java
-│   │       		│	│	└── ServiceConfigResolver.java
-│   │       		│	├── exception
-│   │       		│	│	├── ConfigException.enum
-│   │       		│	│	└── FrameworkException.enum
-│   │       		│	├── http
-│   │       		│	│	├── BaseApiClient.java
-│   │       		│	│	├── HttpMethod.enum
-│   │       		│	│	├── RequestSpecFactory.java
-│   │       		│	│	├── ResponseSpecFactory.java
-│   │       		│	│	└── SensitiveHeaderFilter.java
-│   │       		│	├── metrics
-│   │       		│	│	└── MetricsCollector.java
-│   │       		│	├── mock
-│   │       		│	│	└── WireMockManager.java
-│   │       		│	├── observability
-│   │       		│	│	└── CorrelationManager.java
-│   │       		│	├── pagination
-│   │       		│	│	├──LinkHeaderParser.java
-│   │       		│	│	└── PaginationHelper.java
-│   │       		│	├── reporting
-│   │       		│	│	└── AllureRestAssuredFilter.java
-│   │       		│	├── resilience
-│   │       		│	│	├──CircuitBreaker.java
-│   │       		│	│	├──CircuitBreakerRegistry.java
-│   │       		│	│	└── CircuitState.enum
-│   │       		│	├── retry
-│   │       		│	│	├──RetryContext.java
-│   │      		│	│	├──RetryExecutor.java
-│   │       		│	│	└── RetryPolicy.java
-│   │       		│	├── schema
-│   │       		│	│	├── JsonSchemaValidator.java
-│   │       		│	│	└── SchemaLoader.java
-│   │       		│	└── validation
-│   │       		│		├──RateLimitValidator.java
-│   │       		│		└── ResponseValidator.java
+│   │       		│	     ├── annotation/
+│   │       		│	     ├── chaos/
+│   │       		│	     ├── config/
+│   │       		│	     ├── exception/
+│   │       		│	     ├── http/
+│   │       		│	     ├── metrics/
+│   │       		│	     ├── mock/
+│   │       		│	     ├── observability/
+│   │       		│	     ├── pagination/
+│   │       		│	     ├── reporting/
+│   │       		│	     ├── resilience/
+│   │       		│	     ├── retry/
+│   │       		│	     ├── schema/
+│   │       		│	     └── validation/
 │   │       		│
 │   │       		├── data/
-│   │       		│	├── github/
-│   │                   │       │        ├──builders
-│   │       		│	│        │         └── RepoBuilder.java
-│   │       		│	│        └── GitHubDataFactory.java
-│   │       		│	├── petstore/
-│   │                   │       │        ├──builders
-│   │       		│	│        │         └── PetBuilder.java
-│   │       		│	│        └── PetstoreDataFactory.java
-│   │       		│	├── reqres/
-│   │                   │       │        ├──builders
-│   │       		│	│        │         └── ReqresUserBuilder.java
-│   │       		│	│        └── ReqresDataFactory.java
-│   │       		│	├──DataContext.java
-│   │       		│       └──DataSeedManager.java
+│   │       		│	     ├── github/
+│   │         │      │        └── builders/
+│   │       		│	     ├── petstore/
+│   │         │      │        └── builders/
+│   │       		│	     ├── reqres/
+│   │         │      │        └── builders/
+│   │       		│	     ├── DataContext.java
+│   │       		│      └── DataSeedManager.java
 │   │       		│
 │   │       		├── domain/
-│   │       		│	├── common/
-│   │       		│	│	└── ErrorResponse.java
-│   │       		│	├── github/
-│   │       		│	│	├── CreateRepoRequest.java
-│   │       		│	│	├── PaginationResponse.java
-│   │       		│	│	└── RepoResponse.java
-│   │       		│	├── petstore/
-│   │       		│	│	├── Category.java
-│   │       		│	│	├── PetRequest.java
-│   │       		│	│	└── PetResponse.java
-│   │       		│	└── reqres/
-│   │       		│		├── CreateUserRequest.java
-│   │       		│		├── CreateUserResponse.java
-│   │       		│		└── GetUserResponse.java
+│   │       		│	     ├── common/
+│   │       		│	     ├── github/
+│   │       		│	     ├── petstore/
+│   │       		│	     └── reqres/
 │   │       		└── utils (empty)
 │   │
 │   └── test/
 │       ├── java/
-│       │	├── framework
-│       │       │	├── core
-│       │       │	│     ├── listener
-│       │       │	│     │        └── ServiceExecutionListener.java
-│       │       │	│     └── service
-│       │       │	│              └── ServiceRegistry.java
-│       │       │	└── tools
-│       │       │	      └── ServiceDiscoveryRunner.java
-│       │       │
-│       │	└── tests/
-│       │    		├── base
-│       │    		│	└── BaseTest.java
-│       │    		├── github
-│       │    		│	├── GitHubAuthNegativeTest.java
-│    	│		│	├── GitHubConcurrencyTest.java
-│    	│		│	├── GitHubDuplicateRepoNegativeTest.java
-│    	│		│	├── GitHubPaginationTest.java
-│    	│		│	├── GitHubRateLimitTest.java
-│    	│		│	└── GitHubRepoSmokeTest.java
-│       │    		├── petstore
-│       │    		│	├── CreateGetDeletePetFlowTest.java
-│    	│		│	├── CreatePetNegativeTest.java
-│    	│		│	├── CreatePetTest.java
-│    	│		│	├── FindPetByStatusTest.java
-│    	│		│	└── UploadPetImageTest.java
-│       │    		└── reqres
-│       │    			├── stubs/
-│       │    			│	├── CreateUserStub.java
-│       │    			│	├── ErrorStubs.java
-│       │    			│	├── GetUserStub.java
-│       │    			│	└── RetrySimulationStub.java
-│    	│			├── CreateUserNegativeTest.java
-│    	│			├── CreateUserTest.java
-│    	│			├── GetUsersTest.java
-│    	│			├── ReqresBaseTest.java
-│    	│			└── RetryValidationTest.java
-│    	│
-│   	└── resources/
-│      		├── _files(auto-generated)
-│      		├── config/
-│       	│   	├── qa.properties
-│       	│   	├── stage.properties
-│       	│   	└── prod.properties
-│      		├── payloads(empty)
-│       	└── schemas/
-│           		├── petstore/
-│           		│	├── create-pet-response.json
-│    			│	├── error-response.json
-│    			│	├── find-by-status-response.json
-│    			│	└── get-pet-response.json
-│              	        ├── reqres/
-│                   	│   	├── create-users-response.json
-│       	        │       └── get-users-response.json
-│              	        └── sample-image.jpg
-│
+│       │	      ├── framework/
+│       │       │	     ├── core/
+│       │       │	     │      ├── listener/
+│       │       │	     │      └── service/
+│       │       │	     └── tools/
+│       │	      └── tests/
+│       │    		          ├── base/
+│       │    		          ├── github/
+│       │    		          ├── petstore
+│       │    		          └── reqres/
+│       │    			                 └── stubs/
+│   	   └── resources/
+│      		          ├── config/
+│       	          └── schemas/
+│           		               ├── petstore/
+│              	             ├── reqres/
+│              	             └── sample-image.jpg
 ├── Jenkinsfile
 ├── .gitignore
 ├── Project Structure
