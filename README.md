@@ -1,5 +1,6 @@
 # restassured-enterprise-framework – Enterprise API Automation Platform
 
+
 Enterprise-grade **API automation and resilience testing framework** built with:
 
 * Java
